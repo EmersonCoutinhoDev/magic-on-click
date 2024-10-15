@@ -1,0 +1,34 @@
+#!/bin/bash
+set -e
+
+# Verificar se o executável foi instalado corretamente
+if [ -f "/usr/bin/magic" ]; then
+    echo "Executável encontrado."
+    chmod -R +x /usr/bin/magic
+else
+    echo "Erro: o executável /usr/bin/magic não foi encontrado."
+    exit 1
+fi
+
+# Definir a variável de ambiente para XDG_RUNTIME_DIR
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+
+# Verificar se o arquivo .desktop existe
+if [ -f "/usr/share/applications/magic.desktop" ]; then
+    chmod -R +x /usr/share/applications/magic.desktop
+    echo "Arquivo magic.desktop encontrado."
+elif [ -f "/usr/share/assets" ]; then
+    chmod -R +x /usr/share/magic/assets 
+elif [ -f "/usr/share/magic/assets/hicolor/256x256/apps/" ]; then
+    chmod -R +x /usr/share/magic/assets/hicolor/256x256/apps/magic.png
+else
+    echo "Erro: arquivo magic.desktop não encontrado."
+    exit 1
+fi
+
+# Atualizar o cache de ícones (caso necessário)
+if [ -x "/usr/bin/update-desktop-database" ]; then
+    update-desktop-database
+fi
+
+exit 0
