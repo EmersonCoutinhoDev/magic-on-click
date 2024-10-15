@@ -3,6 +3,7 @@ import sys
 import subprocess
 import os
 import re
+import requests
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog
 from PyQt5.QtCore import QThread, pyqtSignal, Qt, QSize
 from PyQt5.QtGui import QIcon, QPixmap
@@ -65,7 +66,6 @@ class CustomTitleBar(QWidget):
 
     def close_window(self):
         self.parentWidget().close()
-
 
 class CommandExecutor(QWidget):
     # Definir sinais que serão usados para comunicação
@@ -217,7 +217,6 @@ class CommandExecutor(QWidget):
             self.file_path = file_path
             # Exibe o caminho no campo de texto
             self.file_path_display.setText(file_path)
-
             self.file_path_display.show()
             self.install_button.show()
             self.paste_button.hide()

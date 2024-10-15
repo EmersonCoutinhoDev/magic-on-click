@@ -1,4 +1,5 @@
 #!/bin/bash
+
 set -e  # Para o script em caso de erro
 
 # Variáveis
