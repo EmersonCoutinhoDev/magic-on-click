@@ -10,6 +10,7 @@ PACKAGE_DIR="./magic-on-click"
 BIN_PATH="$PACKAGE_DIR/usr/bin"
 PYINSTALLER_OPTIONS="--onefile"
 DEBIAN_DIR="./DEBIAN"
+FILE_VERSION="./usr/lib"
 
 echo "1. Gerando o binário com PyInstaller..."
 pyinstaller $PYINSTALLER_OPTIONS --name $APP_NAME --distpath $DIST_DIR $SOURCE_FILE
@@ -25,6 +26,7 @@ mkdir -p $BIN_PATH  # Garante que o diretório binário existe
 cp -R ./usr/ $PACKAGE_DIR
 cp -R $DEBIAN_DIR $PACKAGE_DIR/  # Copia o diretório DEBIAN/
 cp -R "$DIST_DIR/$APP_NAME" "$BIN_PATH/magic"
+cp -R $FILE_VERSION "$PACKAGE_DIR/usr"
 
 echo "3. Configurando permissões..."
 sudo chmod +x "$BIN_PATH/magic"

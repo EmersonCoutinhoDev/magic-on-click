@@ -17,6 +17,9 @@ sed -i "s/^Version:.*/Version: $VERSION/" $PACKAGE_NAME/DEBIAN/control
 # Atualiza a versão no arquivo .desktop (caso tenha essa linha)
 sed -i "s/^Version=.*/Version=$VERSION/" $PACKAGE_NAME/usr/share/applications/magic.desktop
 
+# Atualiza a versão no arquivo version
+sed -i "s/^Version=.*/Version=$VERSION/" $PACKAGE_NAME/usr/lib/version
+
 # Garante que o arquivo .desktop está acessível
 if [ ! -f $PACKAGE_NAME/usr/share/applications/magic.desktop ]; then
   echo "Erro: O arquivo magic.desktop não foi encontrado."
