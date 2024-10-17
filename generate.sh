@@ -26,10 +26,12 @@ mkdir -p $BIN_PATH  # Garante que o diretório binário existe
 cp -R ./usr/ $PACKAGE_DIR
 cp -R $DEBIAN_DIR $PACKAGE_DIR/  # Copia o diretório DEBIAN/
 cp -R "$DIST_DIR/$APP_NAME" "$BIN_PATH/magic"
-cp -R $FILE_VERSION "$PACKAGE_DIR/usr"
+cp -R $FILE_VERSION "$PACKAGE_DIR/usr" # Copia o diretorio lib/magic/(version)
 
 echo "3. Configurando permissões..."
-sudo chmod +x "$BIN_PATH/magic"
-sudo chmod +x /usr/share/magic/assets/hicolor/256x256/apps/magic.png
+sudo chmod +x ./"$BIN_PATH/magic"
+sudo chmod +x ./usr/share/applications/magic.desktop
+sudo chmod +x ./usr/share/magic/assets/hicolor/256x256/apps/magic.png
+sudo chmod +x ./usr/lib/magic/version
 
 echo "Binario gerado com sucesso!"

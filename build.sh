@@ -18,7 +18,7 @@ sed -i "s/^Version:.*/Version: $VERSION/" $PACKAGE_NAME/DEBIAN/control
 sed -i "s/^Version=.*/Version=$VERSION/" $PACKAGE_NAME/usr/share/applications/magic.desktop
 
 # Atualiza a versão no arquivo version
-sed -i "s/^Version=.*/Version=$VERSION/" $PACKAGE_NAME/usr/lib/version
+sed -i "s/^v.*/v$VERSION/" $PACKAGE_NAME/usr/lib/magic/version
 
 # Garante que o arquivo .desktop está acessível
 if [ ! -f $PACKAGE_NAME/usr/share/applications/magic.desktop ]; then

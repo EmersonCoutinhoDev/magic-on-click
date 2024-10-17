@@ -11,6 +11,30 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import QThread, pyqtSignal
 from datetime import datetime
 
+# def get_installed_version():
+#     try:
+#         with open("/usr/share/magic/version", "r") as file:
+#             version = file.read().strip()
+#             return version
+#     except FileNotFoundError:
+#         return "Versão  não encontrada"
+# print(f"Versão instalada: {get_installed_version()}")    
+
+# def get_latest_version():
+#     url = "https://api.github.com/repos/EmersonCoutinhoDev/magic-on-click/releases/latest"
+#     response = requests.get(url)
+#     if response.status_code == 200:
+#         return response.json()["tag_name"].strip("v")
+#     return None
+
+# installed_version = get_installed_version()
+# latest_version = get_latest_version()
+
+# if latest_version and latest_version != installed_version:
+#     print(f"Atualização disponível: {latest_version}")
+# else:
+#     print("Você já está na versão mais recente.")
+    
 # Barra de título personalizada
 class CustomTitleBar(QWidget):
     def __init__(self, parent=None, title=""):
