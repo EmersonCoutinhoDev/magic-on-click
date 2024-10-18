@@ -654,7 +654,7 @@
   ('PyQt5/Qt5/translations/qt_de.qm',
    '/usr/share/qt5/translations/qt_de.qm',
    'DATA')],
- 'libpython3.12.so',
+ 'libpython3.12.so.1.0',
  False,
  False,
  False,

@@ -41,6 +41,14 @@ class CustomTitleBar(QWidget):
         super().__init__(parent)
         self.setFixedHeight(40)  # Altura da barra de título personalizada
 
+        def get_installed_version():
+            try:
+                with open("/usr/lib/magic/version", "r") as file:
+                    version = file.read()
+                    return version
+            except FileNotFoundError:
+                return "Versão  não encontrada"
+
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margens
         layout.setSpacing(3)
@@ -56,6 +64,13 @@ class CustomTitleBar(QWidget):
         self.title_label.setStyleSheet("color: white;")
         layout.addWidget(self.title_label)
 
+        sub_title_label = get_installed_version()
+
+        self.sub_title_label = QLabel(sub_title_label)
+        self.sub_title_label.setStyleSheet("color: white;")
+        layout.addWidget(self.sub_title_label)
+
+        
         # Botão Minimizar
         self.minimize_button = QPushButton("_")
         self.minimize_button.setFixedSize(30, 30)
@@ -126,7 +141,7 @@ class CommandExecutor(QWidget):
         # Adiciona a barra de título personalizada
         self.title_bar = CustomTitleBar(self, title="Magic on click")
         layout.addWidget(self.title_bar)
-
+        
         self.setLayout(layout)
         self.setGeometry(100, 100, 380, 420)
 
