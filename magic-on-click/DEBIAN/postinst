@@ -17,18 +17,14 @@ export XDG_RUNTIME_DIR=/run/user/$(id -u)
 if [ -f "/usr/share/applications/magic.desktop" ]; then
     chmod -R +x /usr/share/applications/magic.desktop
     echo "Arquivo magic.desktop encontrado."
+elif [ -f "/usr/share/magic/assets/" ]; then
+    chmod -R +x /usr/share/magic/assets/*.png
+    echo "Arquivo magic.desktop encontrado."
+
 else
     echo "Erro: arquivo magic.desktop não encontrado."
     exit 1
 fi
-
-if [ -f "/usr/share/magic/assets/" ]; then
-    chmod -R +x /usr/share/magic/assets/*.png
-    echo "Arquivo /assets encontrado."
-else
-    echo "Erro: arquivo /assets não encontrado."
-    exit 1
-
 
 # Atualizar o cache de ícones (caso necessário)
 if [ -x "/usr/bin/update-desktop-database" ]; then

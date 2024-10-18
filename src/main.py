@@ -4,7 +4,7 @@ import sys
 import subprocess
 import os
 import re
-# import requests
+import requests
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog
 from PyQt5.QtCore import QThread, pyqtSignal, Qt, QSize
 from PyQt5.QtGui import QIcon, QPixmap
@@ -20,20 +20,6 @@ from datetime import datetime
 #         return "Versão  não encontrada"
 # print(f"Versão instalada: {get_installed_version()}")    
 
-# def get_latest_version():
-#     url = "https://api.github.com/repos/EmersonCoutinhoDev/magic-on-click/releases/latest"
-#     response = requests.get(url)
-#     if response.status_code == 200:
-#         return response.json()["tag_name"].strip("v")
-#     return None
-
-# installed_version = get_installed_version()
-# latest_version = get_latest_version()
-
-# if latest_version and latest_version != installed_version:
-#     print(f"Atualização disponível: {latest_version}")
-# else:
-#     print("Você já está na versão mais recente.")
     
 # Barra de título personalizada
 class CustomTitleBar(QWidget):
@@ -41,6 +27,7 @@ class CustomTitleBar(QWidget):
         super().__init__(parent)
         self.setFixedHeight(40)  # Altura da barra de título personalizada
 
+        # Função para exibir a versão na janela
         def get_installed_version():
             try:
                 with open("/usr/lib/magic/version", "r") as file:
@@ -48,6 +35,20 @@ class CustomTitleBar(QWidget):
                     return version
             except FileNotFoundError:
                 return "Versão  não encontrada"
+        def get_latest_version():
+            url = "https://api.github.com/repos/EmersonCoutinhoDev/magic-on-click/releases/latest"
+            response = requests.get(url)
+            if response.status_code == 200:
+                return response.json()["tag_name"].strip("v")
+            return None
+
+        installed_version = get_installed_version()
+        latest_version = get_latest_version()
+
+        if latest_version and latest_version != installed_version:
+            print(f"Atualização disponível: {latest_version}")
+        else:
+            print("Você já está na versão mais recente.")
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margens
@@ -64,12 +65,20 @@ class CustomTitleBar(QWidget):
         self.title_label.setStyleSheet("color: white;")
         layout.addWidget(self.title_label)
 
-        sub_title_label = get_installed_version()
-
-        self.sub_title_label = QLabel(sub_title_label)
-        self.sub_title_label.setStyleSheet("color: white;")
-        layout.addWidget(self.sub_title_label)
-
+        sub_title_version = get_installed_version()
+        self.sub_title_version = QLabel(sub_title_version)
+        self.sub_title_version.setStyleSheet("color: gray;")
+        layout.addWidget(self.sub_title_version)
+        
+        sub_latest_version = get_latest_version()
+        self.sub_latest_version = QPushButton(sub_latest_version)
+        self.sub_latest_version.setIcon(QIcon("/usr/share/magic/assets/icon_update.png")) # Button Download new version
+        self.sub_latest_version.setStyleSheet("color: yellow;")
+        if sub_latest_version >= sub_title_version:
+            self.sub_latest_version.hide()
+        else:
+            self.sub_latest_version.show()
+        layout.addWidget(self.sub_latest_version)
         
         # Botão Minimizar
         self.minimize_button = QPushButton("_")
