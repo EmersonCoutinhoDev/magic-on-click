@@ -10,45 +10,12 @@ from PyQt5.QtCore import QThread, pyqtSignal, Qt, QSize
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import QThread, pyqtSignal
 from datetime import datetime
-
-# def get_installed_version():
-#     try:
-#         with open("/usr/share/magic/version", "r") as file:
-#             version = file.read().strip()
-#             return version
-#     except FileNotFoundError:
-#         return "Versão  não encontrada"
-# print(f"Versão instalada: {get_installed_version()}")    
-
     
 # Barra de título personalizada
 class CustomTitleBar(QWidget):
     def __init__(self, parent=None, title=""):
         super().__init__(parent)
         self.setFixedHeight(40)  # Altura da barra de título personalizada
-
-        # Função para exibir a versão na janela
-        def get_installed_version():
-            try:
-                with open("/usr/lib/magic/version", "r") as file:
-                    version = file.read()
-                    return version
-            except FileNotFoundError:
-                return "Versão  não encontrada"
-        def get_latest_version():
-            url = "https://api.github.com/repos/EmersonCoutinhoDev/magic-on-click/releases/latest"
-            response = requests.get(url)
-            if response.status_code == 200:
-                return response.json()["tag_name"].strip("v")
-            return None
-
-        installed_version = get_installed_version()
-        latest_version = get_latest_version()
-
-        if latest_version and latest_version != installed_version:
-            print(f"Atualização disponível: {latest_version}")
-        else:
-            print("Você já está na versão mais recente.")
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margens
@@ -64,21 +31,6 @@ class CustomTitleBar(QWidget):
         self.title_label = QLabel(title)
         self.title_label.setStyleSheet("color: white;")
         layout.addWidget(self.title_label)
-
-        sub_title_version = get_installed_version()
-        self.sub_title_version = QLabel(sub_title_version)
-        self.sub_title_version.setStyleSheet("color: gray;")
-        layout.addWidget(self.sub_title_version)
-        
-        sub_latest_version = get_latest_version()
-        self.sub_latest_version = QPushButton(sub_latest_version)
-        self.sub_latest_version.setIcon(QIcon("/usr/share/magic/assets/icon_update.png")) # Button Download new version
-        self.sub_latest_version.setStyleSheet("color: yellow;")
-        if sub_latest_version >= sub_title_version:
-            self.sub_latest_version.hide()
-        else:
-            self.sub_latest_version.show()
-        layout.addWidget(self.sub_latest_version)
         
         # Botão Minimizar
         self.minimize_button = QPushButton("_")
@@ -135,7 +87,6 @@ class CommandExecutor(QWidget):
             self.output_signal.emit("Nenhum script de instalação padrão encontrado.")
             return
 
-        # Aqui você pode fazer outras operações com self.thread
         # Acesse os métodos e sinais corretamente
         self.thread.output_signal.connect(self.update_result_area)
         self.thread.start()
@@ -189,15 +140,15 @@ class CommandExecutor(QWidget):
         # Botões e layout
         button_layout = QHBoxLayout()
         
-        self.paste_button = QPushButton("paste: ( CLI )", self)
+        self.paste_button = QPushButton("command _cli ", self)
         self.paste_button.setIcon(QIcon("/usr/share/magic/assets/paste_icon.png"))
         self.paste_button.clicked.connect(self.paste_from_clipboard)
         self.paste_button.setStyleSheet("background-color: #4C566A; color: white; margin-top: 5px; margin-bottom: 5px; height: 30px; margin-left: 50px")
         button_layout.addWidget(self.paste_button)
 
         # Botão para abrir o diálogo de seleção de arquivo
-        self.select_file_button = QPushButton("file: ( DEB )", self)
-        self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/linux_icon.png"))
+        self.select_file_button = QPushButton("package .deb ", self)
+        self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/debian_icon.png"))
         self.select_file_button.clicked.connect(self.open_file_dialog)
         self.select_file_button.setStyleSheet("background-color: #4C566A; color: white; margin-top: 5px; margin-bottom: 5px; height: 30px; margin-right: 50px")
         button_layout.addWidget(self.select_file_button)
@@ -243,6 +194,50 @@ class CommandExecutor(QWidget):
         self.execute_button.setIconSize(QSize(24, 24))
         self.paste_button.setIconSize(QSize(24, 24))
         self.clear_button.setIconSize(QSize(24, 24))
+    
+    
+        # Função para exibir a versão na janela
+        def get_installed_version():
+            try:
+                with open("/usr/lib/magic/version", "r") as file:
+                    version = file.read()
+                    return version
+            except FileNotFoundError:
+                return "Versão  não encontrada"
+        def get_latest_version():
+            url = "https://api.github.com/repos/EmersonCoutinhoDev/magic-on-click/releases/latest"
+            response = requests.get(url)
+            if response.status_code == 200:
+                return response.json()["tag_name"].strip("v")
+            return None
+
+        installed_version = get_installed_version().strip("v")
+        latest_version = get_latest_version()
+
+        if latest_version and latest_version > installed_version:
+            print(f"Atualização disponível: v{latest_version}")
+        else:
+            print(f"Versão mais recente: v{installed_version}")
+    
+        # Vesion
+        sub_title_version = installed_version
+        self.sub_title_version = QLabel(f"Version: v{sub_title_version} installed.")
+        self.sub_title_version.setStyleSheet("color: gray;")
+        layout.addWidget(self.sub_title_version)
+        
+        # Latest version if true
+        sub_latest_version = latest_version
+        self.sub_latest_version = QPushButton(f"Version: v{sub_latest_version} disponible.")
+        # self.sub_latest_version = QLabel("Version")
+        self.sub_latest_version.setIcon(QIcon("/usr/share/magic/assets/update_icon.png")) # Button Download new version
+        self.sub_latest_version.setStyleSheet("color: yellow;")
+        layout.addWidget(self.sub_latest_version)
+        
+        # Se a versão instalada for menor, mostra o botão de upgrade(latest version)
+        if installed_version < latest_version:
+            self.sub_latest_version.show()
+        else:
+            self.sub_latest_version.hide()
 
     def open_file_dialog(self):
         # Define o caminho inicial para ~/Downloads
@@ -265,6 +260,7 @@ class CommandExecutor(QWidget):
             # Armazena o caminho do arquivo selecionado
             self.file_path = file_path
             # Exibe o caminho no campo de texto
+
             self.file_path_display.setText(file_path)
             self.file_path_display.show()
             self.install_button.show()
@@ -285,7 +281,7 @@ class CommandExecutor(QWidget):
             self.install_tar_package()  # Chama o método para instalar .tar.gz
         else:
             self.result_area.setText("Formato de arquivo não suportado.")
-            return                
+            return  
     def install_rpm_package(self):
         if not self.file_path:
             self.result_area.setText("Nenhum arquivo .rpm selecionado.")
