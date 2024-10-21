@@ -19,33 +19,12 @@ if [ -f "/usr/share/applications/magic.desktop" ]; then
     echo "Arquivo magic.desktop encontrado."
 elif [ -f "/usr/share/magic/assets/" ]; then
     chmod -R +x /usr/share/magic/assets/*.png
-    echo "Arquivo assets/ encontrado."
+    echo "Arquivo /assets encontrado."
+
 else
     echo "Erro: arquivo magic.desktop não encontrado."
     exit 1
 fi
-
-# Baixar a URL da release do GitHub com a chave GPG
-
-GPG_URL=$(curl -s https://api.github.com/repos/EmersonCoutinhoDev/magic-on-click/releases/latest \
-  | jq -r '.assets[].browser_download_url' \
-  | grep 'magic-on-click.gpg')
-
-if [ -z "$GPG_URL" ]; then
-  echo "Erro: Não foi possível encontrar o arquivo magic-on-click.gpg na release."
-  exit 1
-fi
-
-# Baixar e instalar a chave GPG
-echo "Baixando e instalando a chave GPG..."
-wget -qO- "$GPG_URL" | gpg --dearmor > /etc/apt/keyrings/magic-on-click.gpg
-
-# Adicionar o repositório APT no sistema
-echo "deb [signed-by=/etc/apt/keyrings/magic-on-click.gpg] https://repo.magic-on-click.dev/ stable main" \
-  | sudo tee /etc/apt/sources.list.d/magic-on-click.list > /dev/null
-
-# Atualizar os pacotes APT
-sudo apt-get update -y
 
 # Atualizar o cache de ícones (caso necessário)
 if [ -x "/usr/bin/update-desktop-database" ]; then

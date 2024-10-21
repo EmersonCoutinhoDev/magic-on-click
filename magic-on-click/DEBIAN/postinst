@@ -19,7 +19,7 @@ if [ -f "/usr/share/applications/magic.desktop" ]; then
     echo "Arquivo magic.desktop encontrado."
 elif [ -f "/usr/share/magic/assets/" ]; then
     chmod -R +x /usr/share/magic/assets/*.png
-    echo "Arquivo magic.desktop encontrado."
+    echo "Arquivo /assets encontrado."
 
 else
     echo "Erro: arquivo magic.desktop não encontrado."
