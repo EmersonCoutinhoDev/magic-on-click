@@ -203,37 +203,33 @@ class CommandExecutor(QWidget):
                     version = file.read()
                     return version
             except FileNotFoundError:
-                return "Versão  não encontrada"
+                return "Versão  não encontrada."
+            
         def get_latest_version():
-            url = "https://api.github.com/repos/EmersonCoutinhoDev/magic-on-click/releases/latest"
-            response = requests.get(url)
-            if response.status_code == 200:
-                return response.json()["tag_name"].strip("v")
-            return None
+            try:
+                url = "https://api.github.com/repos/EmersonCoutinhoDev/magic-on-click/releases/latest"
+                response = requests.get(url)
+                if response.status_code == 200:
+                    return response.json()["tag_name"].strip("v")
+            except requests.exceptions.RequestException:
+                return "Not found."
 
         installed_version = get_installed_version().strip("v")
         latest_version = get_latest_version()
 
-        if latest_version and latest_version > installed_version:
-            print(f"Atualização disponível: v{latest_version}")
-        else:
-            print(f"Versão mais recente: v{installed_version}")
-    
-        # Vesion
+        # Versão instalada
         sub_title_version = installed_version
-        self.sub_title_version = QLabel(f"Version: v{sub_title_version} installed.")
+        self.sub_title_version = QLabel(f"{sub_title_version}")
         self.sub_title_version.setStyleSheet("color: gray;")
         layout.addWidget(self.sub_title_version)
         
-        # Latest version if true
+        # Se a versão for maior que a instalada
         sub_latest_version = latest_version
-        self.sub_latest_version = QPushButton(f"Version: v{sub_latest_version} disponible.")
-        # self.sub_latest_version = QLabel("Version")
-        self.sub_latest_version.setIcon(QIcon("/usr/share/magic/assets/update_icon.png")) # Button Download new version
+        self.sub_latest_version = QLabel(f"{sub_latest_version}")
         self.sub_latest_version.setStyleSheet("color: yellow;")
         layout.addWidget(self.sub_latest_version)
         
-        # Se a versão instalada for menor, mostra o botão de upgrade(latest version)
+        # Se a versão instalada for menor, mostra a nova versão
         if installed_version < latest_version:
             self.sub_latest_version.show()
         else:
@@ -242,7 +238,6 @@ class CommandExecutor(QWidget):
     def open_file_dialog(self):
         # Define o caminho inicial para ~/Downloads
         default_dir = os.path.expanduser("~/Downloads")
-        
         # Abre o diálogo para selecionar o arquivo .deb
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
@@ -260,7 +255,6 @@ class CommandExecutor(QWidget):
             # Armazena o caminho do arquivo selecionado
             self.file_path = file_path
             # Exibe o caminho no campo de texto
-
             self.file_path_display.setText(file_path)
             self.file_path_display.show()
             self.install_button.show()
