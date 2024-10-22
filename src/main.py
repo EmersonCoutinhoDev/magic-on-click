@@ -109,7 +109,7 @@ class CommandExecutor(QWidget):
         self.command_input = QLineEdit(self)
         self.command_input.hide()
         self.command_input.setStyleSheet("background-color: #4C566A; color: white; margin-top: 15px; height: 30px")
-        self.command_input.setReadOnly(True)
+        self.command_input.setReadOnly(False)
         layout.addWidget(self.command_input)
 
         # Campo para exibir o caminho do arquivo selecionado
@@ -152,15 +152,15 @@ class CommandExecutor(QWidget):
         self.select_file_button.clicked.connect(self.open_file_dialog)
         self.select_file_button.setStyleSheet("background-color: #4C566A; color: white; margin-top: 5px; margin-bottom: 5px; height: 30px; margin-right: 50px")
         button_layout.addWidget(self.select_file_button)
-
+ 
         layout.addLayout(button_layout)
         
         # Área de texto para exibir o resultado do comando
         self.result_area = QTextEdit(self)
         self.result_area.setReadOnly(True)
-        self.result_area.setStyleSheet("background-color: #4C566A; color: yellow; margin-top: 5px")
+        self.result_area.setStyleSheet("background-color: #2E3440; color: grey; margin-top: 5px")
         layout.addWidget(self.result_area)
-
+        
         # Variável para armazenar o caminho do arquivo
         self.file_path = None
         
@@ -194,8 +194,7 @@ class CommandExecutor(QWidget):
         self.execute_button.setIconSize(QSize(24, 24))
         self.paste_button.setIconSize(QSize(24, 24))
         self.clear_button.setIconSize(QSize(24, 24))
-    
-    
+        
         # Função para exibir a versão na janela
         def get_installed_version():
             try:
@@ -529,7 +528,7 @@ class CommandExecutor(QWidget):
                 if file_path:
                     f.write(f"Data e Hora: {timestamp}\nPackage: {file_path}\n")
                 f.write("=" * 40 + "\n")  # Separador para facilitar leitura
-            self.result_area.append(f"Logs salvos em {[ output_file ]}\n")
+            # self.result_area.append(f"Logs salvos em {[ output_file ]}\n")
         except Exception as e:
             self.result_area.append(f"Erro ao salvar as entradas {str(e)}\n")
 
