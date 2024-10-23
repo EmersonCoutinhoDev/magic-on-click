@@ -103,7 +103,7 @@ class CommandExecutor(QWidget):
         layout.addWidget(self.title_bar)
         
         self.setLayout(layout)
-        self.setGeometry(100, 100, 380, 420)
+        self.setGeometry(100, 100, 420, 420)
 
         # Campo de texto para o comando
         self.command_input = QLineEdit(self)
@@ -140,14 +140,14 @@ class CommandExecutor(QWidget):
         # Botões e layout
         button_layout = QHBoxLayout()
         
-        self.paste_button = QPushButton("command _cli ", self)
+        self.paste_button = QPushButton("paste", self)
         self.paste_button.setIcon(QIcon("/usr/share/magic/assets/paste_icon.png"))
         self.paste_button.clicked.connect(self.paste_from_clipboard)
         self.paste_button.setStyleSheet("background-color: #4C566A; color: white; margin-top: 5px; margin-bottom: 5px; height: 30px; margin-left: 50px")
         button_layout.addWidget(self.paste_button)
 
         # Botão para abrir o diálogo de seleção de arquivo
-        self.select_file_button = QPushButton("package .deb ", self)
+        self.select_file_button = QPushButton("package", self)
         self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/debian_icon.png"))
         self.select_file_button.clicked.connect(self.open_file_dialog)
         self.select_file_button.setStyleSheet("background-color: #4C566A; color: white; margin-top: 5px; margin-bottom: 5px; height: 30px; margin-right: 50px")
@@ -390,7 +390,7 @@ class CommandExecutor(QWidget):
             if process.returncode != 0:
                 self.output_signal.emit(f"Erro ao mover arquivos: {stderr}")
             else:
-                self.output_signal.emit("Arquivos movidos com sucesso para /usr/local.")
+                self.output_signal.emit("Arquivos movidos com sucesso.")
 
             shutil.rmtree(extract_dir)
             self.output_signal.emit(f"Diretório {extract_dir} removido com sucesso.")
@@ -404,7 +404,6 @@ class CommandExecutor(QWidget):
         # Extrai apenas o nome do arquivo sem o caminho completo
         file_name = os.path.basename(self.file_path)
         self.result_area.append(f"\nPackage {[ file_name ]} instalado com sucesso.\n")
-        self.result_area.append(f"*****   This is magic!  *****\n")        
 
     def paste_from_clipboard(self):
         clipboard = QApplication.clipboard()
@@ -544,7 +543,6 @@ class CommandExecutor(QWidget):
         result_command = re.sub(r'.*-S\s*', '', commands).strip()
         # Imprime o comando atual finalizado
         self.result_area.append(f"\nCommand {[ result_command ]} executado com sucesso.\n")
-        self.result_area.append(f"*****   This is magic!  *****\n")
 
 # Classe para criar o diálogo de senha personalizado com barra de título personalizada
 class CustomInputDialog(QDialog):
