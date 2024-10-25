@@ -1,8 +1,0 @@
-Package: magic-on-click
-Version: 1.0.0
-Section: utils
-Priority: optional
-Architecture: all
-Essential: no
-Maintainer: emersoncoutinho@protonmail.com
-Description: Magic On Click - uma ferramenta para instalação de scripts de maneira fácil.
