@@ -8,7 +8,6 @@ import requests
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog
 from PyQt5.QtCore import QThread, pyqtSignal, Qt, QSize
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtCore import QThread, pyqtSignal
 from datetime import datetime
     
 # Barra de título personalizada
@@ -103,7 +102,7 @@ class CommandExecutor(QWidget):
         layout.addWidget(self.title_bar)
         
         self.setLayout(layout)
-        self.setGeometry(100, 100, 420, 420)
+        self.resize(420, 420)
 
         # Campo de texto para o comando
         self.command_input = QLineEdit(self)
@@ -233,7 +232,7 @@ class CommandExecutor(QWidget):
             self.sub_latest_version.show()
         else:
             self.sub_latest_version.hide()
-
+    
     def open_file_dialog(self):
         # Define o caminho inicial para ~/Downloads
         default_dir = os.path.expanduser("~/Downloads")
@@ -506,7 +505,8 @@ class CommandExecutor(QWidget):
 
     def save_commands_to_file(self):
          # Pega a data e hora atual no formato desejado
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp_date = datetime.now().strftime("%Y-%m-%d")
+        timestamp_hour = datetime.now().strftime("%H:%M:%S")
         # Diretório .magic no home do usuário
         magic_dir = os.path.expanduser("~/.magic")
         os.makedirs(magic_dir, exist_ok=True)  # Cria o diretório se não existir
@@ -523,9 +523,9 @@ class CommandExecutor(QWidget):
             # Escreve as entradas no arquivo
             with open(output_file, "a") as f:
                 if command_text:
-                    f.write(f"Data e Hora: {timestamp}\nComando: {command_text}\n")
+                    f.write(f"Data: {timestamp_date}\nHora: {timestamp_hour}\nComando: {command_text}\n")
                 if file_path:
-                    f.write(f"Data e Hora: {timestamp}\nPackage: {file_path}\n")
+                    f.write(f"Data: {timestamp_date}\nHora: {timestamp_hour}\nPackage: {file_path}\n")
                 f.write("=" * 40 + "\n")  # Separador para facilitar leitura
             # self.result_area.append(f"Logs salvos em {[ output_file ]}\n")
         except Exception as e:
