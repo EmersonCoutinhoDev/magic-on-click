@@ -265,11 +265,11 @@ class CommandExecutor(QWidget):
             self.result_area.setText("Nenhum arquivo selecionado.")
             return
         # Detecta o tipo de arquivo selecionado
-        if self.file_path.endswith('.deb'):
+        if self.file_path.endswith(".deb"):
             self.install_deb_package()  # Chama o método para instalar .deb
-        elif self.file_path.endswith('.rpm'):
+        elif self.file_path.endswith(".rpm"):
             self.install_rpm_package()  # Chama o método para instalar .rpm
-        elif self.file_path.endswith('.tar.gz'):
+        elif self.file_path.endswith(".tar.gz"):
             self.install_tar_package()  # Chama o método para instalar .tar.gz
         else:
             self.result_area.setText("Formato de arquivo não suportado.")
@@ -353,7 +353,7 @@ class CommandExecutor(QWidget):
 
             self.output_signal.emit("Descompactação concluída com sucesso.\n")
 
-            install_scripts = ["install.sh", "configure.sh", "setup.sh"]
+            install_scripts = ["install.sh", "configure.sh", "setup.sh", "studio.sh"]
             script_found = False
 
             for root, _, files in os.walk(extract_dir):
@@ -371,7 +371,7 @@ class CommandExecutor(QWidget):
                             shutil.rmtree(extract_dir)
                             return
 
-                        self.output_signal.emit(f"Script {script} executado com sucesso.")
+                        self.output_signal.emit(f"Script: '{script}', executado com sucesso.")
                         script_found = True
                         break
                 if script_found:
@@ -392,7 +392,7 @@ class CommandExecutor(QWidget):
                 self.output_signal.emit("Arquivos movidos com sucesso.")
 
             shutil.rmtree(extract_dir)
-            self.output_signal.emit(f"Diretório {extract_dir} removido com sucesso.")
+            self.output_signal.emit(f"Diretório: '{extract_dir}', removido com sucesso.")
 
         # Crie uma instância do `InstallThread` passando a função `run_commands`
         self.thread.run = run_commands        
@@ -402,7 +402,7 @@ class CommandExecutor(QWidget):
         self.progress_bar.setValue(100)
         # Extrai apenas o nome do arquivo sem o caminho completo
         file_name = os.path.basename(self.file_path)
-        self.result_area.append(f"\nPackage {[ file_name ]} instalado com sucesso.\n")
+        self.result_area.append(f"\nPackage: '{file_name}', instalado com sucesso.\n")
 
     def paste_from_clipboard(self):
         clipboard = QApplication.clipboard()
@@ -444,7 +444,7 @@ class CommandExecutor(QWidget):
         commands = [cmd.strip() for cmd in commands if cmd.strip()]
         
         # Palavras-chave a serem verificadas
-        keywords = ["remove", "purge", "upgrade", "install"]
+        keywords = ["remove", "purge", "upgrade", "install", "autoremove"]
 
         # Iterar sobre cada comando e verificar se ele contém palavras exatas das keywords
         for cmd in commands:
@@ -540,9 +540,9 @@ class CommandExecutor(QWidget):
     def print_command_completion(self, commands):
         self.progress_bar.setValue(100)
         # Usando expressão regular para remover tudo até e incluindo '-S'
-        result_command = re.sub(r'.*-S\s*', '', commands).strip()
+        result_command = re.sub(r".*-S\s*", "", commands).strip()
         # Imprime o comando atual finalizado
-        self.result_area.append(f"\nCommand {[ result_command ]} executado com sucesso.\n")
+        self.result_area.append(f"\nCommand: '{result_command}', executado com sucesso.\n")
 
 # Classe para criar o diálogo de senha personalizado com barra de título personalizada
 class CustomInputDialog(QDialog):
