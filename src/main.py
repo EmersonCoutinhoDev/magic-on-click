@@ -39,11 +39,11 @@ class CustomTitleBar(QWidget):
         layout.addWidget(self.minimize_button)
 
         # Botão Maximizar
-        self.maximize_button = QPushButton("□")
-        self.maximize_button.setFixedSize(30, 30)
-        self.maximize_button.clicked.connect(self.maximize_window)
-        self.maximize_button.setStyleSheet("background-color: #4C566A; color: white;")
-        layout.addWidget(self.maximize_button)
+        # self.maximize_button = QPushButton("□")
+        # self.maximize_button.setFixedSize(30, 30)
+        # self.maximize_button.clicked.connect(self.maximize_window)
+        # self.maximize_button.setStyleSheet("background-color: #4C566A; color: white;")
+        # layout.addWidget(self.maximize_button)
 
         # Botão Fechar
         self.close_button = QPushButton("X")
@@ -58,11 +58,11 @@ class CustomTitleBar(QWidget):
     def minimize_window(self):
         self.parentWidget().showMinimized()
 
-    def maximize_window(self):
-        if self.parentWidget().isMaximized():
-            self.parentWidget().showNormal()
-        else:
-            self.parentWidget().showMaximized()
+    # def maximize_window(self):
+    #     if self.parentWidget().isMaximized():
+    #         self.parentWidget().showNormal()
+    #     else:
+    #         self.parentWidget().showMaximized()
 
     def close_window(self):
         self.parentWidget().close()
@@ -85,7 +85,6 @@ class CommandExecutor(QWidget):
         if not self.thread:
             self.output_signal.emit("Nenhum script de instalação padrão encontrado.")
             return
-
         # Acesse os métodos e sinais corretamente
         self.thread.output_signal.connect(self.update_result_area)
         self.thread.start()
@@ -102,7 +101,13 @@ class CommandExecutor(QWidget):
         layout.addWidget(self.title_bar)
         
         self.setLayout(layout)
-        self.resize(420, 420)
+        width = 420
+        height = 420
+        
+        # # setting the maximum size 
+        self.setMaximumSize(width, height) 
+        self.resize(width, height)
+        
 
         # Campo de texto para o comando
         self.command_input = QLineEdit(self)
@@ -232,7 +237,7 @@ class CommandExecutor(QWidget):
             self.sub_latest_version.show()
         else:
             self.sub_latest_version.hide()
-    
+        
     def open_file_dialog(self):
         # Define o caminho inicial para ~/Downloads
         default_dir = os.path.expanduser("~/Downloads")
@@ -276,7 +281,7 @@ class CommandExecutor(QWidget):
             return  
     def install_rpm_package(self):
         if not self.file_path:
-            self.result_area.setText("Nenhum arquivo .rpm selecionado.")
+            self.result_area.setText("Nenhum arquivo '.rpm' selecionado.")
             return
 
         # Solicita a senha de administrador
@@ -323,7 +328,7 @@ class CommandExecutor(QWidget):
 
     def install_tar_package(self):
         if not self.file_path:
-            self.result_area.setText("Nenhum arquivo .tar.gz selecionado.")
+            self.result_area.setText("Nenhum arquivo '.tar.gz' selecionado.")
             return
 
         password, ok = CustomInputDialog(self).get_input()
@@ -347,11 +352,11 @@ class CommandExecutor(QWidget):
             _, stderr = process.communicate()
 
             if process.returncode != 0:
-                self.output_signal.emit(f"Erro ao descompactar: {stderr}")
+                self.output_signal.emit(f"Erro ao descompactar: '{stderr}'\n")
                 shutil.rmtree(extract_dir)
                 return
 
-            self.output_signal.emit("Descompactação concluída com sucesso.\n")
+            self.output_signal.emit("Descompactação concluída com sucesso.")
 
             install_scripts = ["install.sh", "configure.sh", "setup.sh", "studio.sh"]
             script_found = False
@@ -367,18 +372,18 @@ class CommandExecutor(QWidget):
                         _, stderr = process.communicate()
 
                         if process.returncode != 0:
-                            self.output_signal.emit(f"Erro ao executar {script}: {stderr}")
+                            self.output_signal.emit(f"Erro ao executar '{script}': '{stderr}'\n")
                             shutil.rmtree(extract_dir)
                             return
 
-                        self.output_signal.emit(f"Script: '{script}', executado com sucesso.")
+                        self.output_signal.emit(f"Script: '{script}', executado com sucesso.\n")
                         script_found = True
                         break
                 if script_found:
                     break
 
             if not script_found:
-                self.output_signal.emit(f"Nenhum script de instalação encontrado.\n O arquivo {extract_dir} será removido.\n")
+                self.output_signal.emit(f"Nenhum script de instalação encontrado.\n O arquivo '{extract_dir}' será removido.\n")
                 shutil.rmtree(extract_dir)
                 return
 
@@ -387,12 +392,12 @@ class CommandExecutor(QWidget):
             _, stderr = process.communicate()
 
             if process.returncode != 0:
-                self.output_signal.emit(f"Erro ao mover arquivos: {stderr}")
+                self.output_signal.emit(f"Erro ao mover arquivos: '{stderr}'\n")
             else:
                 self.output_signal.emit("Arquivos movidos com sucesso.")
 
             shutil.rmtree(extract_dir)
-            self.output_signal.emit(f"Diretório: '{extract_dir}', removido com sucesso.")
+            self.output_signal.emit(f"\nDiretório: '{extract_dir}', removido com sucesso.\n")
 
         # Crie uma instância do `InstallThread` passando a função `run_commands`
         self.thread.run = run_commands        
@@ -500,7 +505,7 @@ class CommandExecutor(QWidget):
             subprocess.check_output(f"sudo -k && echo {password} | sudo -S -v", shell=True, stderr=subprocess.STDOUT, universal_newlines=True)
             return True
         except subprocess.CalledProcessError as e:
-            self.result_area.setText(f"Erro de validação: {e.output}")  # Mostrar o erro no resultado
+            self.result_area.setText(f"Erro de validação: '{e.output}'\n")  # Mostrar o erro no resultado
             return False
 
     def save_commands_to_file(self):
@@ -529,7 +534,7 @@ class CommandExecutor(QWidget):
                 f.write("=" * 40 + "\n")  # Separador para facilitar leitura
             # self.result_area.append(f"Logs salvos em {[ output_file ]}\n")
         except Exception as e:
-            self.result_area.append(f"Erro ao salvar as entradas {str(e)}\n")
+            self.result_area.append(f"Erro ao salvar as entradas: '{str(e)}'\n")
 
     def update_result_area(self, output):
         self.result_area.append(output)
@@ -673,7 +678,7 @@ class CommandThread(QThread):
                 self.command_finished_signal.emit(command)
             
             except Exception as e:
-                self.output_signal.emit(f"Erro ao executar comando: {str(e)}")
+                self.output_signal.emit(f"Erro ao executar comando: '{str(e)}'\n")
 
         self.progress_signal.emit(100)
 
