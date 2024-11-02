@@ -1,3 +1,4 @@
 build/
 dist/
 magic-on-click/
+*.deb

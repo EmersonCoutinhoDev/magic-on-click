@@ -162,7 +162,7 @@ class CommandExecutor(QWidget):
         # Área de texto para exibir o resultado do comando
         self.result_area = QTextEdit(self)
         self.result_area.setReadOnly(True)
-        self.result_area.setStyleSheet("background-color: #2E3440; color: grey; margin-top: 5px")
+        self.result_area.setStyleSheet("background-color: #2E3440; color: white; margin-top: 5px")
         layout.addWidget(self.result_area)
         
         # Variável para armazenar o caminho do arquivo
