@@ -112,7 +112,7 @@ class CommandExecutor(QWidget):
         # Campo de texto para o comando
         self.command_input = QLineEdit(self)
         self.command_input.hide()
-        self.command_input.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; border: none;")
+        self.command_input.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; border: none; font-size: 20px;")
         self.command_input.setAlignment(Qt.AlignCenter)
         self.command_input.setReadOnly(False)
         layout.addWidget(self.command_input)
@@ -120,7 +120,7 @@ class CommandExecutor(QWidget):
         # Campo para exibir o caminho do arquivo selecionado
         self.file_path_display = QLineEdit(self)
         self.file_path_display.hide()
-        self.file_path_display.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; border: none;")
+        self.file_path_display.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; border: none; font-size: 20px;")
         self.file_path_display.setAlignment(Qt.AlignCenter)
         self.file_path_display.setReadOnly(True)
         layout.addWidget(self.file_path_display)
