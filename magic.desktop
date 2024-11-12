@@ -1,6 +1,6 @@
 [Desktop Entry]
 Version=1.0.0
-Name=Magic On Click
+Name=Magic cn click
 Comment=Ferramenta de instalação de software
 Exec=/usr/bin/magic
 Icon=/usr/share/magic/assets/hicolor/256x256/apps/magic.png

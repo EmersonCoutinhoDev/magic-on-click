@@ -102,7 +102,7 @@ class CommandExecutor(QWidget):
         
         self.setLayout(layout)
         width = 420
-        height = 420
+        height = 380
         
         # # setting the maximum size 
         self.setMaximumSize(width, height) 
@@ -112,14 +112,16 @@ class CommandExecutor(QWidget):
         # Campo de texto para o comando
         self.command_input = QLineEdit(self)
         self.command_input.hide()
-        self.command_input.setStyleSheet("background-color: #4C566A; color: white; margin-top: 15px; height: 30px")
+        self.command_input.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; border: none;")
+        self.command_input.setAlignment(Qt.AlignCenter)
         self.command_input.setReadOnly(False)
         layout.addWidget(self.command_input)
 
         # Campo para exibir o caminho do arquivo selecionado
         self.file_path_display = QLineEdit(self)
         self.file_path_display.hide()
-        self.file_path_display.setStyleSheet("background-color: #4C566A; color: white; margin-top: 15px; height: 30px")
+        self.file_path_display.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; border: none;")
+        self.file_path_display.setAlignment(Qt.AlignCenter)
         self.file_path_display.setReadOnly(True)
         layout.addWidget(self.file_path_display)
 
@@ -162,7 +164,7 @@ class CommandExecutor(QWidget):
         # Área de texto para exibir o resultado do comando
         self.result_area = QTextEdit(self)
         self.result_area.setReadOnly(True)
-        self.result_area.setStyleSheet("background-color: #2E3440; color: white; margin-top: 5px")
+        self.result_area.setStyleSheet("background-color: #2E3440; border: 0px; color: white; margin-top: 5px")
         layout.addWidget(self.result_area)
         
         # Variável para armazenar o caminho do arquivo
@@ -174,8 +176,7 @@ class CommandExecutor(QWidget):
         self.progress_bar.hide()
         self.progress_bar.setStyleSheet("""
         QProgressBar {
-            border: 1px solid #3B4252;
-            border-radius: 5px;
+            border: 0px solid #3B4252;
             background-color: #2E3440;
         }
         QProgressBar::chunk {
@@ -255,10 +256,11 @@ class CommandExecutor(QWidget):
         )
         
         if file_path:
-            # Armazena o caminho do arquivo selecionado
             self.file_path = file_path
-            # Exibe o caminho no campo de texto
-            self.file_path_display.setText(file_path)
+            # Obtém apenas o nome do arquivo
+            file_name = os.path.basename(file_path)
+            # Exibe o nome do arquivo no campo de texto
+            self.file_path_display.setText(file_name)
             self.file_path_display.show()
             self.install_button.show()
             self.paste_button.hide()
