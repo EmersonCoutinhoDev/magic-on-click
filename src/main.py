@@ -18,17 +18,21 @@ class CustomTitleBar(QWidget):
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margens
-        layout.setSpacing(3)
+        layout.setSpacing(0)
 
-        # Ícone
+        # Configura o ícone
         self.icon_label = QLabel(self)
-        pixmap = QPixmap("/usr/share/magic/assets/magic.png")  # Substitua pelo caminho do ícone
-        self.icon_label.setPixmap(pixmap.scaled(50, 50))  # Ajusta o tamanho do ícone
+        pixmap = QPixmap("/usr/share/magic/assets/magic.png")  
+        self.icon_label.setPixmap(pixmap.scaled(50, 50))  
+        self.icon_label.setFixedWidth(50) 
+        self.icon_label.setStyleSheet("margin-left: 0px; margin-right: 0px; padding: 0px;")
+        self.icon_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.icon_label)
 
         # Título
         self.title_label = QLabel(title)
-        self.title_label.setStyleSheet("color: white;")
+        self.title_label.setStyleSheet("color: white; margin: 10px; font-size: 20px;")
+        self.title_label.setAlignment(Qt.AlignLeft)
         layout.addWidget(self.title_label)
         
         # Botão Minimizar
@@ -37,13 +41,6 @@ class CustomTitleBar(QWidget):
         self.minimize_button.clicked.connect(self.minimize_window)
         self.minimize_button.setStyleSheet("background-color: #4C566A; color: white;")
         layout.addWidget(self.minimize_button)
-
-        # Botão Maximizar
-        # self.maximize_button = QPushButton("□")
-        # self.maximize_button.setFixedSize(30, 30)
-        # self.maximize_button.clicked.connect(self.maximize_window)
-        # self.maximize_button.setStyleSheet("background-color: #4C566A; color: white;")
-        # layout.addWidget(self.maximize_button)
 
         # Botão Fechar
         self.close_button = QPushButton("X")
@@ -57,12 +54,6 @@ class CustomTitleBar(QWidget):
 
     def minimize_window(self):
         self.parentWidget().showMinimized()
-
-    # def maximize_window(self):
-    #     if self.parentWidget().isMaximized():
-    #         self.parentWidget().showNormal()
-    #     else:
-    #         self.parentWidget().showMaximized()
 
     def close_window(self):
         self.parentWidget().close()
@@ -107,7 +98,6 @@ class CommandExecutor(QWidget):
         # # setting the maximum size 
         self.setMaximumSize(width, height) 
         self.resize(width, height)
-        
 
         # Campo de texto para o comando
         self.command_input = QLineEdit(self)
@@ -126,37 +116,37 @@ class CommandExecutor(QWidget):
         layout.addWidget(self.file_path_display)
 
         # Botão para executar o comando cli 
-        self.execute_button = QPushButton("execute", self)
+        self.execute_button = QPushButton("Execute", self)
         self.execute_button.hide()
         self.execute_button.clicked.connect(self.execute_command)
         self.execute_button.clicked.connect(self.save_commands_to_file)
         self.execute_button.setIcon(QIcon("/usr/share/magic/assets/cli_icon.png"))
-        self.execute_button.setStyleSheet("background-color: #172554; color: white; height: 30px; margin-top: 5px; margin-left: 100px; margin-right: 100px;")
+        self.execute_button.setStyleSheet("background-color: #059669; color: black; height: 30px; width: 30px; margin-top: 5px; margin-left: 100px; margin-right: 100px;")
         layout.addWidget(self.execute_button)        
         
         # Botão para executar o comando dpkg -i
-        self.install_button = QPushButton("install", self)
+        self.install_button = QPushButton("Install", self)
         self.install_button.hide()  # Oculta o botão inicialmente
         self.install_button.clicked.connect(self.install_package)  # Conecta o sinal de clique ao método
         self.install_button.clicked.connect(self.save_commands_to_file)
         self.install_button.setIcon(QIcon("/usr/share/magic/assets/install_icon.png"))  # Define o ícone do botão
-        self.install_button.setStyleSheet("background-color: #172554; color: white; height: 30px; margin-top: 5px; margin-left: 100px; margin-right: 100px;")  # Estilo do botão
+        self.install_button.setStyleSheet("background-color: #059669; color: black; height: 30px; width: 30px; margin-top: 5px; margin-left: 100px; margin-right: 100px;")  # Estilo do botão
         layout.addWidget(self.install_button)  # Adiciona o botão ao layout
 
         # Botões e layout
         button_layout = QHBoxLayout()
         
-        self.paste_button = QPushButton("paste", self)
+        self.paste_button = QPushButton("Command", self)
         self.paste_button.setIcon(QIcon("/usr/share/magic/assets/paste_icon.png"))
         self.paste_button.clicked.connect(self.paste_from_clipboard)
-        self.paste_button.setStyleSheet("background-color: #4C566A; color: white; margin-top: 5px; margin-bottom: 5px; height: 30px; margin-left: 50px")
+        self.paste_button.setStyleSheet("background-color: #172554; color: white; height: 30px; width: 30px; margin-top: 50px; margin-left: 50px; margin-right: 0px;")
         button_layout.addWidget(self.paste_button)
 
         # Botão para abrir o diálogo de seleção de arquivo
-        self.select_file_button = QPushButton("package", self)
+        self.select_file_button = QPushButton("Package", self)
         self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/debian_icon.png"))
         self.select_file_button.clicked.connect(self.open_file_dialog)
-        self.select_file_button.setStyleSheet("background-color: #4C566A; color: white; margin-top: 5px; margin-bottom: 5px; height: 30px; margin-right: 50px")
+        self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 30px; width: 30px; margin-top: 50px; margin-left: 0px; margin-right: 50px;")
         button_layout.addWidget(self.select_file_button)
  
         layout.addLayout(button_layout)
@@ -164,7 +154,7 @@ class CommandExecutor(QWidget):
         # Área de texto para exibir o resultado do comando
         self.result_area = QTextEdit(self)
         self.result_area.setReadOnly(True)
-        self.result_area.setStyleSheet("background-color: #2E3440; border: 0px; color: white; margin-top: 5px")
+        self.result_area.setStyleSheet("background-color: #2E3440; border: 0px; color: gray; margin-top: 5px")
         layout.addWidget(self.result_area)
         
         # Variável para armazenar o caminho do arquivo
@@ -187,11 +177,11 @@ class CommandExecutor(QWidget):
         layout.addWidget(self.progress_bar)
         self.setLayout(layout)
 
-        self.clear_button = QPushButton("clear", self)
+        self.clear_button = QPushButton("Clear", self)
         self.clear_button.setIcon(QIcon("/usr/share/magic/assets/clear_icon.png"))
         self.clear_button.hide()
         self.clear_button.clicked.connect(self.clear_input)
-        self.clear_button.setStyleSheet("background-color: #4C566A; color: white; margin-top: 5px; margin-bottom: 5px; height: 30px; margin-left: 100px; margin-right: 100px")
+        self.clear_button.setStyleSheet("background-color: #D32F2F; color: black; height: 30px; width: 30px; margin-top: 5px; margin-bottom: 5px; margin-left: 100px; margin-right: 100px;")
         layout.addWidget(self.clear_button)
 
         self.select_file_button.setIconSize(QSize(24, 24))
@@ -609,7 +599,7 @@ class CustomInputDialog(QDialog):
         self.cancel_button.clicked.connect(self.reject)
         self.cancel_button.setStyleSheet("background-color: #D32F2F; color: white;")
         button_layout.addWidget(self.cancel_button)
-
+ 
         # Botão OK
         self.ok_button = QPushButton("OK")
         self.ok_button.clicked.connect(self.accept)
