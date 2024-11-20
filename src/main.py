@@ -31,7 +31,7 @@ class CustomTitleBar(QWidget):
 
         # Título
         self.title_label = QLabel(title)
-        self.title_label.setStyleSheet("color: white; margin: 10px; font-size: 20px;")
+        self.title_label.setStyleSheet("color: white; margin: 5px; font-size: 20px;")
         self.title_label.setAlignment(Qt.AlignLeft)
         layout.addWidget(self.title_label)
         
@@ -193,42 +193,23 @@ class CommandExecutor(QWidget):
         # Função para exibir a versão na janela
         def get_installed_version():
             try:
-                with open("/usr/lib/magic/version", "r") as file:
-                    version = file.read()
-                    return version
+                path = "/usr/share/applications/magic.desktop"
+                with open(path, "r") as file:
+                    for line in file:
+                        if line.startswith("Version"):
+                            return line.split("=")[1].strip()
+                return "Versão não encontrada."
             except FileNotFoundError:
-                return "Versão  não encontrada."
-            
-        def get_latest_version():
-            try:
-                url = "https://api.github.com/repos/EmersonCoutinhoDev/magic-on-click/releases/latest"
-                response = requests.get(url)
-                if response.status_code == 200:
-                    return response.json()["tag_name"].strip("v")
-            except requests.exceptions.RequestException:
-                return "Not found."
+                return "Arquivo não encontrado."
 
-        installed_version = get_installed_version().strip("v")
-        latest_version = get_latest_version()
+        installed_version = get_installed_version()
 
         # Versão instalada
         sub_title_version = installed_version
         self.sub_title_version = QLabel(f"{sub_title_version}")
         self.sub_title_version.setStyleSheet("color: gray;")
         layout.addWidget(self.sub_title_version)
-        
-        # Se a versão for maior que a instalada
-        sub_latest_version = latest_version
-        self.sub_latest_version = QLabel(f"{sub_latest_version}")
-        self.sub_latest_version.setStyleSheet("color: yellow;")
-        layout.addWidget(self.sub_latest_version)
-        
-        # Se a versão instalada for menor, mostra a nova versão
-        if installed_version < latest_version:
-            self.sub_latest_version.show()
-        else:
-            self.sub_latest_version.hide()
-        
+                
     def open_file_dialog(self):
         # Define o caminho inicial para ~/Downloads
         default_dir = os.path.expanduser("~/Downloads")
