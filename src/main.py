@@ -144,7 +144,7 @@ class CommandExecutor(QWidget):
 
         # Botão para abrir o diálogo de seleção de arquivo
         self.select_file_button = QPushButton("Package", self)
-        self.select_file_button.setIcon(QIcon("./usr/share/magic/assets/search_icon.png"))
+        self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/search_icon.png"))
         self.select_file_button.clicked.connect(self.open_file_dialog)
         self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 100px; width: 30px; margin-top: 80px; margin-left: 0px; margin-right: 50px;")
         button_layout.addWidget(self.select_file_button)
@@ -331,7 +331,7 @@ class CommandExecutor(QWidget):
 
             self.output_signal.emit("Descompactação concluída com sucesso.")
 
-            install_scripts = ["install.sh", "configure.sh", "setup.sh", "studio.sh"]
+            install_scripts = ["install.sh", "configure.sh", "setup.sh", "execute.sh"]
             script_found = False
 
             for root, _, files in os.walk(extract_dir):
