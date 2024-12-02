@@ -139,14 +139,14 @@ class CommandExecutor(QWidget):
         self.paste_button = QPushButton("Command", self)
         self.paste_button.setIcon(QIcon("/usr/share/magic/assets/paste_icon.png"))
         self.paste_button.clicked.connect(self.paste_from_clipboard)
-        self.paste_button.setStyleSheet("background-color: #172554; color: white; height: 100px; width: 30px; margin-top: 80px; margin-left: 50px; margin-right: 0px;")
+        self.paste_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 100px; margin-left: 50px; margin-right: 0px;")
         button_layout.addWidget(self.paste_button)
 
         # Botão para abrir o diálogo de seleção de arquivo
         self.select_file_button = QPushButton("Package", self)
         self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/search_icon.png"))
         self.select_file_button.clicked.connect(self.open_file_dialog)
-        self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 100px; width: 30px; margin-top: 80px; margin-left: 0px; margin-right: 50px;")
+        self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 100px; margin-left: 0px; margin-right: 50px;")
         button_layout.addWidget(self.select_file_button)
  
         layout.addLayout(button_layout)
