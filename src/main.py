@@ -434,17 +434,19 @@ class CommandExecutor(QWidget):
             if keyword_update in words:
                 if "sudo" not in cmd:
                     self.result_area.setText(
-                        f"O comando '{cmd}' contém 'update' e precisa incluir 'sudo' para ser executado."
+                        f"O comando '{cmd}' contém '{keyword_update}' e precisa incluir 'sudo' para ser executado."
                     )
                     return  # Para aqui, pois encontrou um problema
             
-            # Verificar se o comando contém "sudo"
-            if "sudo" not in cmd:
-                self.result_area.setText(
-                    f"O comando '{cmd}' precisa incluir 'sudo' para ser executado com permissão."
-                )
-                return  # Para aqui, pois encontrou um comando que precisa de correção
-
+            # Verificar outras palavras-chave
+            for keyword in keywords:
+                if keyword in words:
+                    if "sudo" not in cmd:
+                        self.result_area.setText(
+                            f"O comando '{cmd}' contém '{keyword}' e precisa incluir 'sudo' para ser executado com permissão."
+                        )
+                        return  # Interrompe aqui, pois há um problema com o comando
+            
             # Verificar se alguma palavra do comando está na lista de keywords
             if any(word in keywords for word in words):
                 # Verificar se o comando já contém -y ou --yes
