@@ -422,7 +422,7 @@ class CommandExecutor(QWidget):
         commands = [cmd.strip() for cmd in commands if cmd.strip()]
         
         # Palavras-chave a serem verificadas
-        keywords = ["remove", "purge", "upgrade", "install", "autoremove"]
+        keywords = ["remove", "purge", "uninstall", "delete", "upgrade", "install", "autoremove", "autoclean"]
         keyword_update = "update"  # Palavra-chave que exige 'sudo'
         
         # Iterar sobre cada comando e verificar se ele contém palavras exatas das keywords
