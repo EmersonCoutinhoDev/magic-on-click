@@ -423,11 +423,27 @@ class CommandExecutor(QWidget):
         
         # Palavras-chave a serem verificadas
         keywords = ["remove", "purge", "upgrade", "install", "autoremove"]
-
+        keyword_update = "update"  # Palavra-chave que exige 'sudo'
+        
         # Iterar sobre cada comando e verificar se ele contém palavras exatas das keywords
         for cmd in commands:
             # Dividir o comando em palavras individuais
             words = cmd.split()
+            
+            # Verificar se o comando contém a palavra "update"
+            if keyword_update in words:
+                if "sudo" not in cmd:
+                    self.result_area.setText(
+                        f"O comando '{cmd}' contém 'update' e precisa incluir 'sudo' para ser executado."
+                    )
+                    return  # Para aqui, pois encontrou um problema
+            
+            # Verificar se o comando contém "sudo"
+            if "sudo" not in cmd:
+                self.result_area.setText(
+                    f"O comando '{cmd}' precisa incluir 'sudo' para ser executado com permissão."
+                )
+                return  # Para aqui, pois encontrou um comando que precisa de correção
 
             # Verificar se alguma palavra do comando está na lista de keywords
             if any(word in keywords for word in words):
@@ -438,7 +454,7 @@ class CommandExecutor(QWidget):
                         f"O comando '{cmd}' precisa de '-y' ou '--yes' para execução automática."
                     )
                     return  # Para aqui, pois encontrou um comando que precisa de correção
-
+                
         if not commands:
             self.result_area.setText("Nenhum comando válido fornecido.")
             return
@@ -504,7 +520,7 @@ class CommandExecutor(QWidget):
                     f.write(f"Data: {timestamp_date}\nHora: {timestamp_hour}\nComando: {command_text}\n")
                 if file_path:
                     f.write(f"Data: {timestamp_date}\nHora: {timestamp_hour}\nPackage: {file_path}\n")
-                f.write("=" * 40 + "\n")  # Separador para facilitar leitura
+                f.write("=" * 17 + "\n")  # Separador para facilitar leitura
             # self.result_area.append(f"Logs salvos em {[ output_file ]}\n")
         except Exception as e:
             self.result_area.append(f"Erro ao salvar as entradas: '{str(e)}'\n")

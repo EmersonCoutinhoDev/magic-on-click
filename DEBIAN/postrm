@@ -6,11 +6,6 @@ if [ -f "/usr/share/applications/magic.desktop" ]; then
     rm /usr/share/applications/magic.desktop
 fi
 
-# Remove versão do aplicatiovo (caso precise)
-if [ -f "/usr/lib/magic/version" ]; then
-    rm /usr/lib/magic/version
-fi
-
 # Limpar o cache de ícones (caso precise)
 if [ -x "/usr/bin/update-desktop-database" ]; then
     update-desktop-database
