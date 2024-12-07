@@ -18,7 +18,7 @@ class CustomTitleBar(QWidget):
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margens
-        layout.setSpacing(0)
+        layout.setSpacing(2)
 
         # Configura o ícone
         self.icon_label = QLabel(self)
@@ -293,11 +293,30 @@ class CommandExecutor(QWidget):
             self.thread.output_signal.connect(self.update_result_area)
             self.thread.progress_signal.connect(self.update_progress_bar)
             self.thread.finished.connect(self.on_command_finished)
+            self.thread.finished.connect(self.finished_with_delete)
             self.progress_bar.setValue(0)
             self.progress_bar.show()
             self.thread.start()
         else:
             self.result_area.setText("Senha incorreta. Tente novamente.")
+
+    def finished_with_delete(self):
+        self.progress_bar.setValue(100)
+        self.result_area.append("\nInstalação concluída.\n")
+
+        # Extrai apenas o nome do arquivo
+        file_name = os.path.basename(self.file_path)
+
+        # Exibe o diálogo para confirmar a exclusão do arquivo
+        confirm_dialog = ConfirmDeleteDialog(file_name, self)
+        if confirm_dialog.exec_() == QDialog.Accepted:
+            try:
+                os.remove(self.file_path)
+                self.result_area.append(f"Arquivo '{self.file_path}' excluído com sucesso.")
+            except Exception as e:
+                self.result_area.append(f"Erro ao excluir o arquivo: {e}")
+        else:
+            self.result_area.append(f"Arquivo '{self.file_path}' mantido.")
 
     def install_tar_package(self):
         if not self.file_path:
@@ -540,6 +559,67 @@ class CommandExecutor(QWidget):
         # Imprime o comando atual finalizado
         self.result_area.append(f"\nCommand: '{result_command}', executado com sucesso.\n")
 
+class ConfirmDeleteDialog(QDialog):
+    def __init__(self, file_name, parent=None):
+        super().__init__(parent)
+        self.file_name = file_name
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowFlags(Qt.FramelessWindowHint)  # Remove a barra de título padrão
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #2E3440;
+                color: white;
+            }
+            QPushButton {
+                background-color: #81A1C1;
+                color: white;
+                padding: 5px;
+                border-radius: 2px;
+            }
+            QPushButton:hover {
+                background-color: #88C0D0;
+            }
+            QLabel {
+                color: white;
+            }
+        """)
+
+        layout = QVBoxLayout()
+        
+        # Barra de título personalizada
+        self.title_bar = CustomTitleBar(self, title="Deseja excluir?")
+        layout.addWidget(self.title_bar)
+
+        # Definir o tamanho do diálogo
+        self.setLayout(layout)
+        self.setGeometry(60, 60, 280, 180)
+
+        # Mensagem de confirmação
+        file_label = QLabel(f"'{self.file_name}'")
+        file_label.setAlignment(Qt.AlignCenter)
+        file_label.setWordWrap(True)
+        layout.addWidget(file_label)
+
+        # Layout para os botões
+        button_layout = QHBoxLayout()
+
+        # Botão Excluir
+        self.delete_button = QPushButton("Excluir")
+        self.delete_button.clicked.connect(self.accept)
+        self.delete_button.setStyleSheet("background-color: #D32F2F; color: white;")
+        button_layout.addWidget(self.delete_button)
+
+        # Botão Manter
+        self.cancel_button = QPushButton("Manter")
+        self.cancel_button.clicked.connect(self.reject)
+        self.cancel_button.setStyleSheet("background-color: #059669; color: white;")
+        button_layout.addWidget(self.cancel_button)
+
+        # Adicionar o layout de botões ao layout principal
+        layout.addLayout(button_layout)        
+
 # Classe para criar o diálogo de senha personalizado com barra de título personalizada
 class CustomInputDialog(QDialog):
     def __init__(self, parent=None):
@@ -610,7 +690,7 @@ class CustomInputDialog(QDialog):
 
         # Adicionar os botões ao layout principal
         layout.addLayout(button_layout)
-        self.setLayout(layout)
+        # self.setLayout(layout)
 
     def get_input(self):
         if self.exec_() == QDialog.Accepted:
