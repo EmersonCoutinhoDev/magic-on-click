@@ -312,11 +312,11 @@ class CommandExecutor(QWidget):
         if confirm_dialog.exec_() == QDialog.Accepted:
             try:
                 os.remove(self.file_path)
-                self.result_area.append(f"Arquivo '{self.file_path}' excluído com sucesso.")
+                self.result_area.setText(f"Arquivo '{self.file_path}' excluído com sucesso.")
             except Exception as e:
-                self.result_area.append(f"Erro ao excluir o arquivo: {e}")
+                self.result_area.setText(f"Erro ao excluir o arquivo: {e}")
         else:
-            self.result_area.append(f"Arquivo '{self.file_path}' mantido.")
+            self.result_area.setText(f"Arquivo '{self.file_path}' mantido.")
 
     def install_tar_package(self):
         if not self.file_path:
@@ -589,7 +589,7 @@ class ConfirmDeleteDialog(QDialog):
         layout = QVBoxLayout()
         
         # Barra de título personalizada
-        self.title_bar = CustomTitleBar(self, title="Deseja excluir?")
+        self.title_bar = CustomTitleBar(self, title="Opções")
         layout.addWidget(self.title_bar)
 
         # Definir o tamanho do diálogo
@@ -597,7 +597,7 @@ class ConfirmDeleteDialog(QDialog):
         self.setGeometry(60, 60, 280, 180)
 
         # Mensagem de confirmação
-        file_label = QLabel(f"'{self.file_name}'")
+        file_label = QLabel(f"Deseja excluir:\n'{self.file_name}'?")
         file_label.setAlignment(Qt.AlignCenter)
         file_label.setWordWrap(True)
         layout.addWidget(file_label)
