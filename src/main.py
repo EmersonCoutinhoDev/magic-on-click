@@ -136,14 +136,14 @@ class CommandExecutor(QWidget):
         # Botões e layout
         button_layout = QHBoxLayout()
         
-        self.paste_button = QPushButton("Command", self)
+        self.paste_button = QPushButton("Execute\nCommand", self)
         self.paste_button.setIcon(QIcon("/usr/share/magic/assets/paste_icon.png"))
         self.paste_button.clicked.connect(self.paste_from_clipboard)
         self.paste_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 100px; margin-left: 50px; margin-right: 0px;")
         button_layout.addWidget(self.paste_button)
 
         # Botão para abrir o diálogo de seleção de arquivo
-        self.select_file_button = QPushButton("Package", self)
+        self.select_file_button = QPushButton("Install\nPackage", self)
         self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/search_icon.png"))
         self.select_file_button.clicked.connect(self.open_file_dialog)
         self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 100px; margin-left: 0px; margin-right: 50px;")
@@ -316,7 +316,7 @@ class CommandExecutor(QWidget):
             except Exception as e:
                 self.result_area.setText(f"Erro ao excluir o arquivo: {e}")
         else:
-            self.result_area.setText(f"Arquivo '{file_name}' será mantido.")
+            self.result_area.setText(f"Arquivo '{file_name}' será mantido em '{self.file_path}'.")
 
     def install_tar_package(self):
         if not self.file_path:
