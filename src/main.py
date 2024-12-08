@@ -309,14 +309,14 @@ class CommandExecutor(QWidget):
 
         # Exibe o diálogo para confirmar a exclusão do arquivo
         confirm_dialog = ConfirmDeleteDialog(file_name, self)
-        if confirm_dialog.exec_() == QDialog.Accepted:
+        if confirm_dialog.exec() == QDialog.Accepted:
             try:
                 os.remove(self.file_path)
-                self.result_area.setText(f"Arquivo '{self.file_path}' excluído com sucesso.")
+                self.result_area.setText(f"Arquivo '{file_name}' foi excluído com sucesso.")
             except Exception as e:
                 self.result_area.setText(f"Erro ao excluir o arquivo: {e}")
         else:
-            self.result_area.setText(f"Arquivo '{self.file_path}' mantido.")
+            self.result_area.setText(f"Arquivo '{file_name}' será mantido.")
 
     def install_tar_package(self):
         if not self.file_path:
