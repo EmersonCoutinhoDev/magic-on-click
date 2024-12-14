@@ -1,10 +1,9 @@
-from http.client import HTTPException
+# from http.client import HTTPException
 import shutil
 import sys
 import subprocess
 import os
 import re
-import requests
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog
 from PyQt5.QtCore import QThread, pyqtSignal, Qt, QSize
 from PyQt5.QtGui import QIcon, QPixmap
@@ -63,6 +62,7 @@ class CommandExecutor(QWidget):
     output_signal = pyqtSignal(str)
     progress_signal = pyqtSignal(int)
     command_finished_signal = pyqtSignal(str)
+    finished_with_delete_signal = pyqtSignal()  # Sinal para quando terminar
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -292,8 +292,8 @@ class CommandExecutor(QWidget):
             self.thread = CommandThread([f"echo {password} | sudo -S dpkg -i {self.file_path}"], password)
             self.thread.output_signal.connect(self.update_result_area)
             self.thread.progress_signal.connect(self.update_progress_bar)
-            self.thread.finished.connect(self.on_command_finished)
-            self.thread.finished.connect(self.finished_with_delete)
+            self.thread.command_finished_signal.connect(self.on_command_finished)
+            self.thread.finished_with_delete_signal.connect(self.finished_with_delete)
             self.progress_bar.setValue(0)
             self.progress_bar.show()
             self.thread.start()
@@ -301,7 +301,7 @@ class CommandExecutor(QWidget):
             self.result_area.setText("Senha incorreta. Tente novamente.")
 
     def finished_with_delete(self):
-        self.progress_bar.setValue(100)
+        self.progress_bar.hide()
         self.result_area.append("\nInstalação concluída.\n")
 
         # Extrai apenas o nome do arquivo
@@ -312,11 +312,11 @@ class CommandExecutor(QWidget):
         if confirm_dialog.exec() == QDialog.Accepted:
             try:
                 os.remove(self.file_path)
-                self.result_area.setText(f"Arquivo '{file_name}' foi excluído com sucesso.")
+                self.result_area.setText(f"Arquivo '{file_name}' foi excluído de '{self.file_path.split(file_name)}' com sucesso.")
             except Exception as e:
                 self.result_area.setText(f"Erro ao excluir o arquivo: {e}")
         else:
-            self.result_area.setText(f"Arquivo '{file_name}' será mantido em '{self.file_path}'.")
+            self.result_area.setText(f"Arquivo '{file_name}' será mantido em '{self.file_path.split(file_name)}'.")
 
     def install_tar_package(self):
         if not self.file_path:
@@ -538,7 +538,7 @@ class CommandExecutor(QWidget):
             # Escreve as entradas no arquivo
             with open(output_file, "a") as f:
                 if command_text:
-                    f.write(f"Data: {timestamp_date}\nHora: {timestamp_hour}\nComando: {command_text}\n")
+                    f.write(f"Data: {timestamp_date}\nHora: {timestamp_hour}\nCommand: {command_text}\n")
                 if file_path:
                     f.write(f"Data: {timestamp_date}\nHora: {timestamp_hour}\nPackage: {file_path}\n")
                 f.write("=" * 17 + "\n")  # Separador para facilitar leitura
@@ -570,6 +570,7 @@ class ConfirmDeleteDialog(QDialog):
         self.setStyleSheet("""
             QDialog {
                 background-color: #2E3440;
+                border: 1px solid #111827;
                 color: white;
             }
             QPushButton {
@@ -583,21 +584,22 @@ class ConfirmDeleteDialog(QDialog):
             }
             QLabel {
                 color: white;
+                font-size: 16px;
             }
         """)
 
         layout = QVBoxLayout()
         
         # Barra de título personalizada
-        self.title_bar = CustomTitleBar(self, title="Opções")
+        self.title_bar = CustomTitleBar(self, title="package options")
         layout.addWidget(self.title_bar)
 
         # Definir o tamanho do diálogo
         self.setLayout(layout)
-        self.setGeometry(60, 60, 280, 180)
+        self.setGeometry(50, 50, 320, 220)
 
         # Mensagem de confirmação
-        file_label = QLabel(f"Deseja excluir:\n'{self.file_name}'?")
+        file_label = QLabel(f"{self.file_name}")
         file_label.setAlignment(Qt.AlignCenter)
         file_label.setWordWrap(True)
         layout.addWidget(file_label)
@@ -606,13 +608,13 @@ class ConfirmDeleteDialog(QDialog):
         button_layout = QHBoxLayout()
 
         # Botão Excluir
-        self.delete_button = QPushButton("Excluir")
+        self.delete_button = QPushButton("Remove")
         self.delete_button.clicked.connect(self.accept)
         self.delete_button.setStyleSheet("background-color: #D32F2F; color: white;")
         button_layout.addWidget(self.delete_button)
 
         # Botão Manter
-        self.cancel_button = QPushButton("Manter")
+        self.cancel_button = QPushButton("Keep")
         self.cancel_button.clicked.connect(self.reject)
         self.cancel_button.setStyleSheet("background-color: #059669; color: white;")
         button_layout.addWidget(self.cancel_button)
@@ -631,6 +633,7 @@ class CustomInputDialog(QDialog):
         self.setStyleSheet("""
             QDialog {
                 background-color: #2E3440;
+                border: 1px solid #111827;
                 color: white;
             }
             QLineEdit {
@@ -651,21 +654,22 @@ class CustomInputDialog(QDialog):
             }
             QLabel {
                 color: white;
+                font-size: 16px;
             }
         """)
 
         layout = QVBoxLayout()
 
         # Barra de título personalizada
-        self.title_bar = CustomTitleBar(self, title="Senha de Usuário")
+        self.title_bar = CustomTitleBar(self, title="User password")
         layout.addWidget(self.title_bar)
 
         self.setLayout(layout)
-        self.setGeometry(60, 60, 280, 180)
+        self.setGeometry(50, 50, 320, 220)
 
         # Campo de entrada de senha
         self.line_edit = QLineEdit(self)
-        self.line_edit.setPlaceholderText("Digite a sua senha")
+        self.line_edit.setPlaceholderText("Insert your password")
         self.line_edit.setEchoMode(QLineEdit.Password)  # Define modo de senha (oculta o texto)
         self.line_edit.setFocus(True)
         layout.addWidget(self.line_edit)
@@ -674,7 +678,7 @@ class CustomInputDialog(QDialog):
         button_layout = QHBoxLayout()
 
         # Botão Cancelar
-        self.cancel_button = QPushButton("Cancelar")
+        self.cancel_button = QPushButton("Exit")
         self.cancel_button.clicked.connect(self.reject)
         self.cancel_button.setStyleSheet("background-color: #D32F2F; color: white;")
         button_layout.addWidget(self.cancel_button)
@@ -703,7 +707,7 @@ class CommandThread(QThread):
     progress_signal = pyqtSignal(int)
     input_required_signal = pyqtSignal()
     command_finished_signal = pyqtSignal(str)
-
+    finished_with_delete_signal = pyqtSignal(bool)
     def __init__(self, commands, password=None):
         super().__init__()
         self.commands = commands
@@ -752,6 +756,7 @@ class CommandThread(QThread):
                 self.output_signal.emit(f"Erro ao executar comando: '{str(e)}'\n")
 
         self.progress_signal.emit(100)
+        self.finished_with_delete_signal.emit(True)
 
     def terminate_process(self):
         if self.process:
