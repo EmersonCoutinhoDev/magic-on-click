@@ -4,7 +4,7 @@ import sys
 import subprocess
 import os
 import re
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog, QListWidget
 from PyQt5.QtCore import QThread, pyqtSignal, Qt, QSize
 from PyQt5.QtGui import QIcon, QPixmap
 from datetime import datetime
@@ -62,7 +62,7 @@ class CommandExecutor(QWidget):
     output_signal = pyqtSignal(str)
     progress_signal = pyqtSignal(int)
     command_finished_signal = pyqtSignal(str)
-    finished_with_delete_signal = pyqtSignal()  # Sinal para quando terminar
+    finished_with_delete_signal = pyqtSignal(bool)  # Sinal para quando terminar
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -139,14 +139,14 @@ class CommandExecutor(QWidget):
         self.paste_button = QPushButton("Execute\nCommand", self)
         self.paste_button.setIcon(QIcon("/usr/share/magic/assets/paste_icon.png"))
         self.paste_button.clicked.connect(self.paste_from_clipboard)
-        self.paste_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 100px; margin-left: 50px; margin-right: 0px;")
+        self.paste_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 50px; margin-left: 50px; margin-right: 0px;")
         button_layout.addWidget(self.paste_button)
 
         # Botão para abrir o diálogo de seleção de arquivo
         self.select_file_button = QPushButton("Install\nPackage", self)
         self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/search_icon.png"))
         self.select_file_button.clicked.connect(self.open_file_dialog)
-        self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 100px; margin-left: 0px; margin-right: 50px;")
+        self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 50px; margin-left: 0px; margin-right: 50px;")
         button_layout.addWidget(self.select_file_button)
  
         layout.addLayout(button_layout)
@@ -190,6 +190,23 @@ class CommandExecutor(QWidget):
         self.paste_button.setIconSize(QSize(24, 24))
         self.clear_button.setIconSize(QSize(24, 24))
         
+        # Função para listar os arquivos .deb
+        def list_deb_files():
+            downloads_path = os.path.expanduser("~/Downloads")  # Caminho para a pasta Downloads
+            deb_files = [f for f in os.listdir(downloads_path) if f.endswith(".deb")]
+
+            if deb_files:
+                return "\n".join(deb_files)
+            else:
+                return "Nenhum arquivo .deb encontrado na pasta Downloads."
+
+        # Exibir lista de arquivos .deb
+        deb_list = list_deb_files()
+        self.file_deb = QLabel(f"Arquivos '.deb' disponiveis em /Downloads:\n{deb_list}\n")
+        self.file_deb.setStyleSheet("color: white; margin-left: 50px;")
+        
+        layout.addWidget(self.file_deb)
+        
         # Função para exibir a versão na janela
         def get_installed_version():
             try:
@@ -209,7 +226,7 @@ class CommandExecutor(QWidget):
         self.sub_title_version = QLabel(f"{sub_title_version}")
         self.sub_title_version.setStyleSheet("color: gray;")
         layout.addWidget(self.sub_title_version)
-                
+            
     def open_file_dialog(self):
         # Define o caminho inicial para ~/Downloads
         default_dir = os.path.expanduser("~/Downloads")
@@ -237,6 +254,7 @@ class CommandExecutor(QWidget):
             self.paste_button.hide()
             self.select_file_button.hide()
             self.clear_button.show()
+            self.file_deb.hide()
 
     def install_package(self):
         if not self.file_path:
@@ -412,6 +430,7 @@ class CommandExecutor(QWidget):
             self.paste_button.hide()
             self.select_file_button.hide()
             self.clear_button.show()
+            self.file_deb.hide()
 
     def clear_input(self):
         self.result_area.clear()
@@ -424,6 +443,8 @@ class CommandExecutor(QWidget):
         self.paste_button.show()
         self.select_file_button.show()
         self.clear_button.hide()
+        self.file_deb.show()
+        
 
     def execute_command(self):
         self.result_area.clear()
@@ -705,7 +726,7 @@ class CustomInputDialog(QDialog):
 class CommandThread(QThread):
     output_signal = pyqtSignal(str)
     progress_signal = pyqtSignal(int)
-    input_required_signal = pyqtSignal()
+    input_required_signal = pyqtSignal(str)
     command_finished_signal = pyqtSignal(str)
     finished_with_delete_signal = pyqtSignal(bool)
     def __init__(self, commands, password=None):
@@ -761,7 +782,7 @@ class CommandThread(QThread):
     def terminate_process(self):
         if self.process:
             self.process.terminate()
-
+            
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     executor = CommandExecutor()
