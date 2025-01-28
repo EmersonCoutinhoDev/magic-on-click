@@ -202,10 +202,13 @@ class CommandExecutor(QWidget):
 
         # Exibir lista de arquivos .deb
         deb_list = list_deb_files()
-        self.file_deb = QLabel(f"Arquivos '.deb' disponiveis em /Downloads:\n{deb_list}\n")
-        self.file_deb.setStyleSheet("color: white; margin-left: 50px;")
         
-        layout.addWidget(self.file_deb)
+        # Exibir lista de arquivos .deb
+        label_deb_list = deb_list
+        self.label_deb_list = QLabel(f"Arquivos '.deb' disponiveis em /Downloads:\n{label_deb_list}\n")
+        self.label_deb_list.setStyleSheet("color: white; margin-left: 50px;")
+        
+        layout.addWidget(self.label_deb_list)
         
         # Função para exibir a versão na janela
         def get_installed_version():
