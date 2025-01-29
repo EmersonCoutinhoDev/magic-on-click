@@ -71,6 +71,8 @@ class CommandExecutor(QWidget):
         # Conecte os sinais aos slots
         self.output_signal.connect(self.update_result_area)
         self.progress_signal.connect(self.update_progress_bar)
+        self.result_area.hide()
+        
 
     def run_commands(self):
         if not self.thread:
@@ -92,13 +94,12 @@ class CommandExecutor(QWidget):
         layout.addWidget(self.title_bar)
         
         self.setLayout(layout)
+        
+        # Dimensões fixas da janela
         width = 420
         height = 380
+        self.setFixedSize(width, height)
         
-        # # setting the maximum size 
-        self.setMaximumSize(width, height) 
-        self.resize(width, height)
-
         # Campo de texto para o comando
         self.command_input = QLineEdit(self)
         self.command_input.hide()
@@ -114,42 +115,56 @@ class CommandExecutor(QWidget):
         self.file_path_display.setAlignment(Qt.AlignCenter)
         self.file_path_display.setReadOnly(True)
         layout.addWidget(self.file_path_display)
+        
+        # Layout horizontal para os botões (lado a lado)
+        horizontal_button_layout = QHBoxLayout()
 
-        # Botão para executar o comando cli 
+        # Botão para executar o comando CLI
         self.execute_button = QPushButton("Execute", self)
         self.execute_button.hide()
         self.execute_button.clicked.connect(self.execute_command)
         self.execute_button.clicked.connect(self.save_commands_to_file)
         self.execute_button.setIcon(QIcon("/usr/share/magic/assets/cli_icon.png"))
-        self.execute_button.setStyleSheet("background-color: #059669; color: black; height: 30px; width: 30px; margin-top: 5px; margin-left: 100px; margin-right: 100px;")
-        layout.addWidget(self.execute_button)        
-        
-        # Botão para executar o comando dpkg -i
+        self.execute_button.setStyleSheet("background-color: #059669; color: black; height: 30px; width: 100px; margin-top: 5px;")
+        horizontal_button_layout.addWidget(self.execute_button)
+
+        # Botão para instalar pacotes
         self.install_button = QPushButton("Install", self)
-        self.install_button.hide()  # Oculta o botão inicialmente
-        self.install_button.clicked.connect(self.install_package)  # Conecta o sinal de clique ao método
+        self.install_button.hide()
+        self.install_button.clicked.connect(self.install_package)
         self.install_button.clicked.connect(self.save_commands_to_file)
-        self.install_button.setIcon(QIcon("/usr/share/magic/assets/install_icon.png"))  # Define o ícone do botão
-        self.install_button.setStyleSheet("background-color: #059669; color: black; height: 30px; width: 30px; margin-top: 5px; margin-left: 100px; margin-right: 100px;")  # Estilo do botão
-        layout.addWidget(self.install_button)  # Adiciona o botão ao layout
+        self.install_button.setIcon(QIcon("/usr/share/magic/assets/install_icon.png"))
+        self.install_button.setStyleSheet("background-color: #059669; color: black; height: 30px; width: 100px; margin-top: 5px;")
+        horizontal_button_layout.addWidget(self.install_button)
+
+        # Botão para limpar
+        self.clear_button = QPushButton("Exit", self)
+        self.clear_button.setIcon(QIcon("/usr/share/magic/assets/clear_icon.png"))
+        self.clear_button.hide()
+        self.clear_button.clicked.connect(self.clear_input)
+        self.clear_button.setStyleSheet("background-color: #D32F2F; color: black; height: 30px; width: 100px; margin-top: 5px;")
+        horizontal_button_layout.addWidget(self.clear_button)
+
+        # Adiciona o layout horizontal ao layout principal
+        layout.addLayout(horizontal_button_layout)
 
         # Botões e layout
-        button_layout = QHBoxLayout()
+        vertical_button_layout = QHBoxLayout()
         
-        self.paste_button = QPushButton("Execute\nCommand", self)
+        self.paste_button = QPushButton("Commands", self)
         self.paste_button.setIcon(QIcon("/usr/share/magic/assets/paste_icon.png"))
         self.paste_button.clicked.connect(self.paste_from_clipboard)
         self.paste_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 50px; margin-left: 50px; margin-right: 0px;")
-        button_layout.addWidget(self.paste_button)
+        vertical_button_layout.addWidget(self.paste_button)
 
         # Botão para abrir o diálogo de seleção de arquivo
-        self.select_file_button = QPushButton("Install\nPackage", self)
+        self.select_file_button = QPushButton("Packages", self)
         self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/search_icon.png"))
         self.select_file_button.clicked.connect(self.open_file_dialog)
         self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 50px; margin-left: 0px; margin-right: 50px;")
-        button_layout.addWidget(self.select_file_button)
+        vertical_button_layout.addWidget(self.select_file_button)
  
-        layout.addLayout(button_layout)
+        layout.addLayout(vertical_button_layout)
         
         # Área de texto para exibir o resultado do comando
         self.result_area = QTextEdit(self)
@@ -177,13 +192,6 @@ class CommandExecutor(QWidget):
         layout.addWidget(self.progress_bar)
         self.setLayout(layout)
 
-        self.clear_button = QPushButton("Clear", self)
-        self.clear_button.setIcon(QIcon("/usr/share/magic/assets/clear_icon.png"))
-        self.clear_button.hide()
-        self.clear_button.clicked.connect(self.clear_input)
-        self.clear_button.setStyleSheet("background-color: #D32F2F; color: black; height: 30px; width: 30px; margin-top: 5px; margin-bottom: 5px; margin-left: 100px; margin-right: 100px;")
-        layout.addWidget(self.clear_button)
-
         self.select_file_button.setIconSize(QSize(24, 24))
         self.install_button.setIconSize(QSize(24, 24))
         self.execute_button.setIconSize(QSize(24, 24))
@@ -205,8 +213,8 @@ class CommandExecutor(QWidget):
         
         # Exibir lista de arquivos .deb
         label_deb_list = deb_list
-        self.label_deb_list = QLabel(f"Arquivos '.deb' disponiveis em /Downloads:\n{label_deb_list}\n")
-        self.label_deb_list.setStyleSheet("color: white; margin-left: 50px;")
+        self.label_deb_list = QLabel(f"Arquivos '.deb' disponiveis em /Downloads:\n\n{label_deb_list}")
+        self.label_deb_list.setStyleSheet("color: gray; margin-left: 50px; margin-top: 15px; margin-bottom: 15px")
         
         layout.addWidget(self.label_deb_list)
         
@@ -227,7 +235,8 @@ class CommandExecutor(QWidget):
         # Versão instalada
         sub_title_version = installed_version
         self.sub_title_version = QLabel(f"{sub_title_version}")
-        self.sub_title_version.setStyleSheet("color: gray;")
+        # self.sub_title_version.setStyleSheet("color: gray;")
+        self.sub_title_version.setStyleSheet("color: gray; margin-left: 15px; margin-top: 15px; margin-bottom: 15px;")
         layout.addWidget(self.sub_title_version)
             
     def open_file_dialog(self):
@@ -257,7 +266,8 @@ class CommandExecutor(QWidget):
             self.paste_button.hide()
             self.select_file_button.hide()
             self.clear_button.show()
-            self.file_deb.hide()
+            self.label_deb_list.hide()
+            self.result_area.show()
 
     def install_package(self):
         if not self.file_path:
@@ -433,8 +443,9 @@ class CommandExecutor(QWidget):
             self.paste_button.hide()
             self.select_file_button.hide()
             self.clear_button.show()
-            self.file_deb.hide()
-
+            self.result_area.show()
+            self.label_deb_list.hide()
+            
     def clear_input(self):
         self.result_area.clear()
         self.progress_bar.setValue(0)
@@ -446,8 +457,8 @@ class CommandExecutor(QWidget):
         self.paste_button.show()
         self.select_file_button.show()
         self.clear_button.hide()
-        self.file_deb.show()
-        
+        self.label_deb_list.show()        
+        self.result_area.hide()
 
     def execute_command(self):
         self.result_area.clear()
