@@ -213,7 +213,7 @@ class CommandExecutor(QWidget):
         
         # Exibir lista de arquivos .deb
         label_deb_list = deb_list
-        self.label_deb_list = QLabel(f"Arquivos '.deb' disponiveis em /Downloads:\n\n{label_deb_list}")
+        self.label_deb_list = QLabel(f"'.deb' files available at /Downloads:\n\n{label_deb_list}")
         self.label_deb_list.setStyleSheet("color: gray; margin-left: 50px; margin-top: 15px; margin-bottom: 15px")
         
         layout.addWidget(self.label_deb_list)
@@ -228,21 +228,21 @@ class CommandExecutor(QWidget):
                     for line in file:
                         if line.startswith("Version"):
                             return line.split("=")[1].strip()
-                return "Versão não encontrada."
+                return "Version not found."
             except FileNotFoundError:
-                return "Arquivo não encontrado."
+                return "File not found."
 
         installed_version = get_installed_version()
 
         # Versão instalada
         sub_title_version = installed_version
         self.sub_title_version = QLabel(f"{sub_title_version}")
-        self.sub_title_version.setStyleSheet("color: gray; margin-left: 15px; margin-top: 15px; margin-bottom: 15px;")
+        self.sub_title_version.setStyleSheet("color: gray; margin-left: 25px; margin-top: 15px; margin-bottom: 15px;")
         horizontal_layout.addWidget(self.sub_title_version)
         
         # Link para o site
-        self.website_link = QLabel('<a href="https://www.magiconclick.com/hub">www.magiconclick.com/hub</a>')
-        self.website_link.setStyleSheet("margin-right: 15px; margin-top: 15px; margin-bottom: 15px;")
+        self.website_link = QLabel('<a href="https://www.magiconclick.com/programs">www.magiconclick.com</a>')
+        self.website_link.setStyleSheet("margin-right: 15px; margin-top: 15px; margin-bottom: 25px;")
         self.website_link.setOpenExternalLinks(True)  # Habilita abertura automática no navegador
         horizontal_layout.addWidget(self.website_link)
         
@@ -258,7 +258,7 @@ class CommandExecutor(QWidget):
         # O filtro foi modificado para incluir tanto .deb
         file_path, _ = QFileDialog.getOpenFileName(
             self, 
-            "Selecione um arquivo", 
+            "Select a file", 
             default_dir, 
             "Package Debian (*.deb);;Package RPM (*.rpm);;Package Tar.gz (*.tar.gz);;", 
             options=options
@@ -280,7 +280,7 @@ class CommandExecutor(QWidget):
 
     def install_package(self):
         if not self.file_path:
-            self.result_area.setText("Nenhum arquivo selecionado.")
+            self.result_area.setText("No files selected.")
             return
         # Detecta o tipo de arquivo selecionado
         if self.file_path.endswith(".deb"):
@@ -290,18 +290,18 @@ class CommandExecutor(QWidget):
         elif self.file_path.endswith(".tar.gz"):
             self.install_tar_package()  # Chama o método para instalar .tar.gz
         else:
-            self.result_area.setText("Formato de arquivo não suportado.")
+            self.result_area.setText("Unsupported file format.")
             return  
     def install_rpm_package(self):
         if not self.file_path:
-            self.result_area.setText("Nenhum arquivo '.rpm' selecionado.")
+            self.result_area.setText("No '.rpm' file selected.")
             return
 
         # Solicita a senha de administrador
         password, ok = CustomInputDialog(self).get_input()
 
         if not ok or not password:
-            self.result_area.setText("Operação cancelada ou senha vazia.")
+            self.result_area.setText("Operation canceled or empty password.")
             return
 
         if self.validate_password(password):
@@ -314,17 +314,17 @@ class CommandExecutor(QWidget):
             self.progress_bar.show()
             self.thread.start()
         else:
-            self.result_area.setText("Senha incorreta. Tente novamente.")
+            self.result_area.setText("Incorrect password. Please try again.")
 
     def install_deb_package(self):
         if not self.file_path:
-            self.result_area.setText("Nenhum arquivo .deb selecionado.")
+            self.result_area.setText("No '.deb' file selected.")
             return
         # Solicita a senha de administrador
         password, ok = CustomInputDialog(self).get_input()
 
         if not ok or not password:
-            self.result_area.setText("Operação cancelada ou senha vazia.")
+            self.result_area.setText("Incorrect password. Please try again.")
             return
 
         if self.validate_password(password):
@@ -338,11 +338,11 @@ class CommandExecutor(QWidget):
             self.progress_bar.show()
             self.thread.start()
         else:
-            self.result_area.setText("Senha incorreta. Tente novamente.")
+            self.result_area.setText("Incorrect password. Please try again.")
 
     def finished_with_delete(self):
         self.progress_bar.hide()
-        self.result_area.append("\nInstalação concluída.\n")
+        self.result_area.append("\nInstallation complete.\n")
 
         # Extrai apenas o nome do arquivo
         file_name = os.path.basename(self.file_path)
@@ -352,25 +352,25 @@ class CommandExecutor(QWidget):
         if confirm_dialog.exec() == QDialog.Accepted:
             try:
                 os.remove(self.file_path)
-                self.result_area.setText(f"Arquivo '{file_name}' foi excluído de '{self.file_path.split(file_name)}' com sucesso.")
+                self.result_area.setText(f"File '{file_name}' was excluded from '{self.file_path.split(file_name)}' successfully.")
             except Exception as e:
-                self.result_area.setText(f"Erro ao excluir o arquivo: {e}")
+                self.result_area.setText(f"Error deleting file: {e}")
         else:
-            self.result_area.setText(f"Arquivo '{file_name}' será mantido em '{self.file_path.split(file_name)}'.")
+            self.result_area.setText(f"File '{file_name}' will be kept in '{self.file_path.split(file_name)}'.")
 
     def install_tar_package(self):
         if not self.file_path:
-            self.result_area.setText("Nenhum arquivo '.tar.gz' selecionado.")
+            self.result_area.setText("No '.tar.gz' file selected.")
             return
 
         password, ok = CustomInputDialog(self).get_input()
 
         if not ok or not password:
-            self.result_area.setText("Operação cancelada ou senha vazia.")
+            self.result_area.setText("Operation canceled or empty password.")
             return
 
         if not self.validate_password(password):
-            self.result_area.setText("Senha incorreta. Tente novamente.")
+            self.result_area.setText("Incorrect password. Please try again.")
             return
 
         self.thread = QThread()
@@ -384,11 +384,11 @@ class CommandExecutor(QWidget):
             _, stderr = process.communicate()
 
             if process.returncode != 0:
-                self.output_signal.emit(f"Erro ao descompactar: '{stderr}'\n")
+                self.output_signal.emit(f"Error when unzipping: '{stderr}'\n")
                 shutil.rmtree(extract_dir)
                 return
 
-            self.output_signal.emit("Descompactação concluída com sucesso.")
+            self.output_signal.emit("Unzipping completed successfully.")
 
             install_scripts = ["install.sh", "configure.sh", "setup.sh", "execute.sh"]
             script_found = False
@@ -404,18 +404,18 @@ class CommandExecutor(QWidget):
                         _, stderr = process.communicate()
 
                         if process.returncode != 0:
-                            self.output_signal.emit(f"Erro ao executar '{script}': '{stderr}'\n")
+                            self.output_signal.emit(f"Error when executing '{script}': '{stderr}'\n")
                             shutil.rmtree(extract_dir)
                             return
 
-                        self.output_signal.emit(f"Script: '{script}', executado com sucesso.\n")
+                        self.output_signal.emit(f"Script: '{script}', successfully executed.\n")
                         script_found = True
                         break
                 if script_found:
                     break
 
             if not script_found:
-                self.output_signal.emit(f"Nenhum script de instalação encontrado.\n O arquivo '{extract_dir}' será removido.\n")
+                self.output_signal.emit(f"No installation script found.\n The file '{extract_dir}' will be removed.\n")
                 shutil.rmtree(extract_dir)
                 return
 
@@ -424,12 +424,12 @@ class CommandExecutor(QWidget):
             _, stderr = process.communicate()
 
             if process.returncode != 0:
-                self.output_signal.emit(f"Erro ao mover arquivos: '{stderr}'\n")
+                self.output_signal.emit(f"Error moving files: '{stderr}'\n")
             else:
-                self.output_signal.emit("Arquivos movidos com sucesso.")
+                self.output_signal.emit("Files moved successfully.")
 
             shutil.rmtree(extract_dir)
-            self.output_signal.emit(f"\nDiretório: '{extract_dir}', removido com sucesso.\n")
+            self.output_signal.emit(f"\nDirectory: '{extract_dir}', successfully removed.\n")
 
         # Crie uma instância do `InstallThread` passando a função `run_commands`
         self.thread.run = run_commands        
@@ -439,7 +439,7 @@ class CommandExecutor(QWidget):
         self.progress_bar.setValue(100)
         # Extrai apenas o nome do arquivo sem o caminho completo
         file_name = os.path.basename(self.file_path)
-        self.result_area.append(f"\nPackage: '{file_name}', instalado com sucesso.\n")
+        self.result_area.append(f"\nPackage: '{file_name}', installed successfully.\n")
 
     def paste_from_clipboard(self):
         clipboard = QApplication.clipboard()
@@ -477,7 +477,7 @@ class CommandExecutor(QWidget):
         command = self.command_input.text().strip()
     
         if not command:
-            self.result_area.setText("Comando vazio. Copie o comando a ser executado.")
+            self.result_area.setText("Empty command. Copy the command to be executed.")
             return
         # Dividir o comando usando barra como separador
         commands = command.split("\\")  # Divide os comandos separados por "\\"
@@ -497,7 +497,7 @@ class CommandExecutor(QWidget):
             if keyword_update in words:
                 if "sudo" not in cmd:
                     self.result_area.setText(
-                        f"O comando '{cmd}' contém '{keyword_update}' e precisa incluir 'sudo' para ser executado."
+                        f"The command '{cmd}' contains '{keyword_update}' and needs to include 'sudo' to run."
                     )
                     return  # Para aqui, pois encontrou um problema
             
@@ -506,7 +506,7 @@ class CommandExecutor(QWidget):
                 if keyword in words:
                     if "sudo" not in cmd:
                         self.result_area.setText(
-                            f"O comando '{cmd}' contém '{keyword}' e precisa incluir 'sudo' para ser executado com permissão."
+                            f"The command '{cmd}' contains '{keyword_update}' and needs to include 'sudo' to run."
                         )
                         return  # Interrompe aqui, pois há um problema com o comando
             
@@ -516,19 +516,19 @@ class CommandExecutor(QWidget):
                 if "-y" not in cmd and "--yes" not in cmd:
                     # Exibir mensagem pedindo correção para aquele comando específico
                     self.result_area.setText(
-                        f"O comando '{cmd}' precisa de '-y' ou '--yes' para execução automática."
+                        f"The command '{cmd}' needs '-y' or '--yes' for automatic execution."
                     )
                     return  # Para aqui, pois encontrou um comando que precisa de correção
                 
         if not commands:
-            self.result_area.setText("Nenhum comando válido fornecido.")
+            self.result_area.setText("No valid commands provided.")
             return
 
         if "sudo" in command:
             password, ok = CustomInputDialog(self).get_input()
             if ok:
                 if not password:
-                    self.result_area.setText("Campo de senha vazio. Tente novamente.")
+                    self.result_area.setText("Empty password field. Please try again.")
                     return
                 # Validar a senha
                 if self.validate_password(password):
@@ -536,10 +536,10 @@ class CommandExecutor(QWidget):
                     sudo_commands = [f"echo {password} | sudo -S {cmd}" for cmd in commands]
                     self.thread = CommandThread(sudo_commands, password)
                 else:
-                    self.result_area.setText("Senha incorreta. Tente novamente.")
+                    self.result_area.setText("Incorrect password. Please try again.")
                     return
             else:
-                self.result_area.setText("Operação cancelada pelo usuário.")
+                self.result_area.setText("Operation canceled by user.")
                 return
         else:
             # Executar os comandos sem sudo
@@ -559,7 +559,7 @@ class CommandExecutor(QWidget):
             subprocess.check_output(f"sudo -k && echo {password} | sudo -S -v", shell=True, stderr=subprocess.STDOUT, universal_newlines=True)
             return True
         except subprocess.CalledProcessError as e:
-            self.result_area.setText(f"Erro de validação: '{e.output}'\n")  # Mostrar o erro no resultado
+            self.result_area.setText(f"Validation error: '{e.output}'\n")  # Mostrar o erro no resultado
             return False
 
     def save_commands_to_file(self):
@@ -577,7 +577,7 @@ class CommandExecutor(QWidget):
             command_text = self.command_input.text().strip()
             # Verifica se há algo para salvar
             if not command_text and not file_path:
-                self.result_area.append("Nenhum comando ou arquivo selecionado.")
+                self.result_area.append("No commands or files selected.")
                 return
             # Escreve as entradas no arquivo
             with open(output_file, "a") as f:
@@ -588,7 +588,7 @@ class CommandExecutor(QWidget):
                 f.write("=" * 17 + "\n")  # Separador para facilitar leitura
             # self.result_area.append(f"Logs salvos em {[ output_file ]}\n")
         except Exception as e:
-            self.result_area.append(f"Erro ao salvar as entradas: '{str(e)}'\n")
+            self.result_area.append(f"Error saving entries: '{str(e)}'\n")
 
     def update_result_area(self, output):
         self.result_area.append(output)
@@ -601,7 +601,7 @@ class CommandExecutor(QWidget):
         # Usando expressão regular para remover tudo até e incluindo '-S'
         result_command = re.sub(r".*-S\s*", "", commands).strip()
         # Imprime o comando atual finalizado
-        self.result_area.append(f"\nCommand: '{result_command}', executado com sucesso.\n")
+        self.result_area.append(f"\nCommand: '{result_command}', executed successfully.\n")
 
 class ConfirmDeleteDialog(QDialog):
     def __init__(self, file_name, parent=None):
@@ -635,7 +635,7 @@ class ConfirmDeleteDialog(QDialog):
         layout = QVBoxLayout()
         
         # Barra de título personalizada
-        self.title_bar = CustomTitleBar(self, title="package options")
+        self.title_bar = CustomTitleBar(self, title="Choose an option")
         layout.addWidget(self.title_bar)
 
         # Definir o tamanho do diálogo
@@ -654,13 +654,13 @@ class ConfirmDeleteDialog(QDialog):
         # Botão Excluir
         self.delete_button = QPushButton("Remove")
         self.delete_button.clicked.connect(self.accept)
-        self.delete_button.setStyleSheet("background-color: #D32F2F; color: white;")
+        self.delete_button.setStyleSheet("background-color: #D32F2F; color: white; margin-bottom: 25px;")
         button_layout.addWidget(self.delete_button)
 
         # Botão Manter
         self.cancel_button = QPushButton("Keep")
         self.cancel_button.clicked.connect(self.reject)
-        self.cancel_button.setStyleSheet("background-color: #059669; color: white;")
+        self.cancel_button.setStyleSheet("background-color: #059669; color: white; margin-buttom: 25px;")
         button_layout.addWidget(self.cancel_button)
 
         # Adicionar o layout de botões ao layout principal
@@ -705,7 +705,7 @@ class CustomInputDialog(QDialog):
         layout = QVBoxLayout()
 
         # Barra de título personalizada
-        self.title_bar = CustomTitleBar(self, title="User password")
+        self.title_bar = CustomTitleBar(self, title="Your password")
         layout.addWidget(self.title_bar)
 
         self.setLayout(layout)
@@ -713,7 +713,7 @@ class CustomInputDialog(QDialog):
 
         # Campo de entrada de senha
         self.line_edit = QLineEdit(self)
-        self.line_edit.setPlaceholderText("Insert your password")
+        self.line_edit.setPlaceholderText("*******")
         self.line_edit.setEchoMode(QLineEdit.Password)  # Define modo de senha (oculta o texto)
         self.line_edit.setFocus(True)
         layout.addWidget(self.line_edit)
@@ -797,7 +797,7 @@ class CommandThread(QThread):
                 self.command_finished_signal.emit(command)
             
             except Exception as e:
-                self.output_signal.emit(f"Erro ao executar comando: '{str(e)}'\n")
+                self.output_signal.emit(f"Error executing command: '{str(e)}'\n")
 
         self.progress_signal.emit(100)
         self.finished_with_delete_signal.emit(True)
