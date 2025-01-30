@@ -4,10 +4,9 @@ import sys
 import subprocess
 import os
 import re
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog, QListWidget
-from PyQt5.QtCore import QThread, pyqtSignal, Qt, QSize, QUrl
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog
+from PyQt5.QtCore import QThread, pyqtSignal, Qt, QSize
 from PyQt5.QtGui import QIcon, QPixmap
-
 from datetime import datetime
     
 # Barra de título personalizada
@@ -118,6 +117,14 @@ class CommandExecutor(QWidget):
         
         # Layout horizontal para os botões (lado a lado)
         horizontal_button_layout = QHBoxLayout()
+        
+        # Botão para limpar
+        self.clear_button = QPushButton("Exit", self)
+        self.clear_button.setIcon(QIcon("/usr/share/magic/assets/clear_icon.png"))
+        self.clear_button.hide()
+        self.clear_button.clicked.connect(self.clear_input)
+        self.clear_button.setStyleSheet("background-color: #D32F2F; color: black; height: 30px; width: 100px; margin-top: 5px;")
+        horizontal_button_layout.addWidget(self.clear_button)
 
         # Botão para executar o comando CLI
         self.execute_button = QPushButton("Execute", self)
@@ -136,14 +143,6 @@ class CommandExecutor(QWidget):
         self.install_button.setIcon(QIcon("/usr/share/magic/assets/install_icon.png"))
         self.install_button.setStyleSheet("background-color: #059669; color: black; height: 30px; width: 100px; margin-top: 5px;")
         horizontal_button_layout.addWidget(self.install_button)
-
-        # Botão para limpar
-        self.clear_button = QPushButton("Exit", self)
-        self.clear_button.setIcon(QIcon("/usr/share/magic/assets/clear_icon.png"))
-        self.clear_button.hide()
-        self.clear_button.clicked.connect(self.clear_input)
-        self.clear_button.setStyleSheet("background-color: #D32F2F; color: black; height: 30px; width: 100px; margin-top: 5px;")
-        horizontal_button_layout.addWidget(self.clear_button)
 
         # Adiciona o layout horizontal ao layout principal
         layout.addLayout(horizontal_button_layout)
@@ -204,17 +203,23 @@ class CommandExecutor(QWidget):
             deb_files = [f for f in os.listdir(downloads_path) if f.endswith(".deb")]
 
             if deb_files:
-                return "\n".join(deb_files)
+                # Numera os arquivos
+                numbered_files = [f"{i + 1}. {file}" for i, file in enumerate(deb_files)]
+                return "\n".join(numbered_files)  # Retorna os arquivos com numeração
             else:
-                return "Nenhum arquivo .deb encontrado na pasta Downloads."
+                return "No '.deb' files found in ~/Downloads."
 
         # Exibir lista de arquivos .deb
         deb_list = list_deb_files()
         
+        self.label_list = QLabel(f"Files available at ~/Downloads:")
+        self.label_list.setStyleSheet("color: gray; margin-top: 15px; margin-bottom: 0px; margin-left: 100px;")
+        layout.addWidget(self.label_list)
+        
         # Exibir lista de arquivos .deb
         label_deb_list = deb_list
-        self.label_deb_list = QLabel(f"'.deb' files available at /Downloads:\n\n{label_deb_list}")
-        self.label_deb_list.setStyleSheet("color: gray; margin-left: 50px; margin-top: 15px; margin-bottom: 15px")
+        self.label_deb_list = QLabel(f"{label_deb_list}")
+        self.label_deb_list.setStyleSheet("color: gray; margin-left: 5px; margin-bottom: 0px; margin-right: 5px; margin-top: 0px; padding-left: 15px; padding: 5px")
         
         layout.addWidget(self.label_deb_list)
         
@@ -236,7 +241,7 @@ class CommandExecutor(QWidget):
 
         # Versão instalada
         sub_title_version = installed_version
-        self.sub_title_version = QLabel(f"{sub_title_version}")
+        self.sub_title_version = QLabel(f"Version: {sub_title_version}")
         self.sub_title_version.setStyleSheet("color: gray; margin-left: 25px; margin-top: 15px; margin-bottom: 15px;")
         horizontal_layout.addWidget(self.sub_title_version)
         
@@ -276,6 +281,7 @@ class CommandExecutor(QWidget):
             self.select_file_button.hide()
             self.clear_button.show()
             self.label_deb_list.hide()
+            self.label_list.hide()
             self.result_area.show()
 
     def install_package(self):
@@ -454,6 +460,7 @@ class CommandExecutor(QWidget):
             self.clear_button.show()
             self.result_area.show()
             self.label_deb_list.hide()
+            self.label_list.hide()
             
     def clear_input(self):
         self.result_area.clear()
@@ -466,7 +473,8 @@ class CommandExecutor(QWidget):
         self.paste_button.show()
         self.select_file_button.show()
         self.clear_button.hide()
-        self.label_deb_list.show()        
+        self.label_deb_list.show()
+        self.label_list.show()        
         self.result_area.hide()
 
     def execute_command(self):
