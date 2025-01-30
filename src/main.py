@@ -5,8 +5,9 @@ import subprocess
 import os
 import re
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog, QListWidget
-from PyQt5.QtCore import QThread, pyqtSignal, Qt, QSize
+from PyQt5.QtCore import QThread, pyqtSignal, Qt, QSize, QUrl
 from PyQt5.QtGui import QIcon, QPixmap
+
 from datetime import datetime
     
 # Barra de título personalizada
@@ -73,7 +74,6 @@ class CommandExecutor(QWidget):
         self.progress_signal.connect(self.update_progress_bar)
         self.result_area.hide()
         
-
     def run_commands(self):
         if not self.thread:
             self.output_signal.emit("Nenhum script de instalação padrão encontrado.")
@@ -218,6 +218,8 @@ class CommandExecutor(QWidget):
         
         layout.addWidget(self.label_deb_list)
         
+        horizontal_layout = QHBoxLayout()
+                
         # Função para exibir a versão na janela
         def get_installed_version():
             try:
@@ -235,9 +237,16 @@ class CommandExecutor(QWidget):
         # Versão instalada
         sub_title_version = installed_version
         self.sub_title_version = QLabel(f"{sub_title_version}")
-        # self.sub_title_version.setStyleSheet("color: gray;")
         self.sub_title_version.setStyleSheet("color: gray; margin-left: 15px; margin-top: 15px; margin-bottom: 15px;")
-        layout.addWidget(self.sub_title_version)
+        horizontal_layout.addWidget(self.sub_title_version)
+        
+        # Link para o site
+        self.website_link = QLabel('<a href="https://www.magiconclick.com/hub">www.magiconclick.com/hub</a>')
+        self.website_link.setStyleSheet("margin-right: 15px; margin-top: 15px; margin-bottom: 15px;")
+        self.website_link.setOpenExternalLinks(True)  # Habilita abertura automática no navegador
+        horizontal_layout.addWidget(self.website_link)
+        
+        layout.addLayout(horizontal_layout)
             
     def open_file_dialog(self):
         # Define o caminho inicial para ~/Downloads
