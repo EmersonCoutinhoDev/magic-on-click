@@ -204,7 +204,7 @@ class CommandExecutor(QWidget):
 
             if deb_files:
                 # Numera os arquivos
-                numbered_files = [f"{i + 1}. {file}" for i, file in enumerate(deb_files)]
+                numbered_files = [f"{i + 1} - {file}" for i, file in enumerate(deb_files)]
                 return "\n".join(numbered_files)  # Retorna os arquivos com numeração
             else:
                 return "No '.deb' files found in ~/Downloads."
@@ -219,7 +219,7 @@ class CommandExecutor(QWidget):
         # Exibir lista de arquivos .deb
         label_deb_list = deb_list
         self.label_deb_list = QLabel(f"{label_deb_list}")
-        self.label_deb_list.setStyleSheet("color: gray; margin-left: 5px; margin-bottom: 0px; margin-right: 5px; margin-top: 0px; padding-left: 15px; padding: 5px")
+        self.label_deb_list.setStyleSheet("color: gray; margin-left: 0px; margin-bottom: 0px; margin-right: 5px; margin-top: 0px; padding-left: 5px; padding: 5px;")
         
         layout.addWidget(self.label_deb_list)
         
@@ -242,12 +242,12 @@ class CommandExecutor(QWidget):
         # Versão instalada
         sub_title_version = installed_version
         self.sub_title_version = QLabel(f"Version: {sub_title_version}")
-        self.sub_title_version.setStyleSheet("color: gray; margin-left: 25px; margin-top: 15px; margin-bottom: 15px;")
+        self.sub_title_version.setStyleSheet("color: gray; margin-left: 5px; margin-top: 15px; margin-bottom: 15px;")
         horizontal_layout.addWidget(self.sub_title_version)
         
         # Link para o site
-        self.website_link = QLabel('<a href="https://www.magiconclick.com/programs">www.magiconclick.com</a>')
-        self.website_link.setStyleSheet("margin-right: 15px; margin-top: 15px; margin-bottom: 25px;")
+        self.website_link = QLabel('<a style=text-decoration:none; href="https://www.magiconclick.com/programs">https://www.magiconclick.com</a>')
+        self.website_link.setStyleSheet("margin-right: 5px; margin-top: 15px; margin-bottom: 15px;")
         self.website_link.setOpenExternalLinks(True)  # Habilita abertura automática no navegador
         horizontal_layout.addWidget(self.website_link)
         
