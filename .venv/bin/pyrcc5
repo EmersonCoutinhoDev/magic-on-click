@@ -1,4 +1,4 @@
-#!/home/user/Documentos/py_cli/.venv/bin/python
+#!/home/user/Documentos/magic-on-click/.venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

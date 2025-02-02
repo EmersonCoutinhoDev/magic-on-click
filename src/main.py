@@ -1,12 +1,11 @@
-# from http.client import HTTPException
 import shutil
 import sys
 import subprocess
 import os
 import re
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog
-from PyQt5.QtCore import QThread, pyqtSignal, Qt, QSize
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog)
+from PyQt5.QtCore import (QThread, pyqtSignal, Qt, QSize)
+from PyQt5.QtGui import (QIcon, QPixmap)
 from datetime import datetime
     
 # Barra de título personalizada
