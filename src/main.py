@@ -297,6 +297,7 @@ class CommandExecutor(QWidget):
         else:
             self.result_area.setText("Unsupported file format.")
             return  
+
     def install_rpm_package(self):
         if not self.file_path:
             self.result_area.setText("No '.rpm' file selected.")
@@ -345,23 +346,42 @@ class CommandExecutor(QWidget):
         else:
             self.result_area.setText("Incorrect password. Please try again.")
 
+    # def finished_with_delete(self):
+    #     self.progress_bar.hide()
+    #     self.result_area.append("\nInstallation complete.\n")
+
+    #     # Extrai apenas o nome do arquivo
+    #     file_name = os.path.basename(self.file_path)
+
+    #     # Exibe o diálogo para confirmar a exclusão do arquivo
+    #     confirm_dialog = ConfirmDeleteDialog(file_name, self)
+    #     if confirm_dialog.exec() == QDialog.Accepted:
+    #         try:
+    #             os.remove(self.file_path)
+    #             self.result_area.setText(f"File '{file_name}' was excluded from '{self.file_path.split(file_name)}' successfully.")
+    #         except Exception as e:
+    #             self.result_area.setText(f"Error deleting file: {e}")
+    #     else:
+    #         self.result_area.setText(f"File '{file_name}' will be kept in '{self.file_path.split(file_name)}'.")
+    
     def finished_with_delete(self):
         self.progress_bar.hide()
         self.result_area.append("\nInstallation complete.\n")
 
         # Extrai apenas o nome do arquivo
         file_name = os.path.basename(self.file_path)
+        file_path = os.path.abspath(self.file_path)  # Obtém o caminho absoluto do arquivo
 
         # Exibe o diálogo para confirmar a exclusão do arquivo
-        confirm_dialog = ConfirmDeleteDialog(file_name, self)
+        confirm_dialog = ConfirmDeleteDialog(file_path, self)
         if confirm_dialog.exec() == QDialog.Accepted:
             try:
-                os.remove(self.file_path)
-                self.result_area.setText(f"File '{file_name}' was excluded from '{self.file_path.split(file_name)}' successfully.")
+                os.remove(file_path)
+                self.result_area.setText(f"File '{file_name}' was excluded from '{file_path}' successfully.")
             except Exception as e:
                 self.result_area.setText(f"Error deleting file: {e}")
         else:
-            self.result_area.setText(f"File '{file_name}' will be kept in '{self.file_path.split(file_name)}'.")
+            self.result_area.setText(f"File '{file_name}' will be kept in '{file_path}'.")
 
     def install_tar_package(self):
         if not self.file_path:
@@ -652,6 +672,7 @@ class ConfirmDeleteDialog(QDialog):
         # Mensagem de confirmação
         file_label = QLabel(f"{self.file_name}")
         file_label.setAlignment(Qt.AlignCenter)
+        file_label.setStyleSheet("margin-top: 5px;")
         file_label.setWordWrap(True)
         layout.addWidget(file_label)
 
@@ -667,7 +688,7 @@ class ConfirmDeleteDialog(QDialog):
         # Botão Manter
         self.cancel_button = QPushButton("Keep")
         self.cancel_button.clicked.connect(self.reject)
-        self.cancel_button.setStyleSheet("background-color: #059669; color: white; margin-buttom: 25px;")
+        self.cancel_button.setStyleSheet("background-color: #059669; color: white; margin-bottom: 25px;")
         button_layout.addWidget(self.cancel_button)
 
         # Adicionar o layout de botões ao layout principal
