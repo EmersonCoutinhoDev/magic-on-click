@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QT
 from PyQt5.QtCore import (QThread, pyqtSignal, Qt, QSize)
 from PyQt5.QtGui import (QIcon, QPixmap)
 from datetime import datetime
-    
+
 # Barra de título personalizada
 class CustomTitleBar(QWidget):
     def __init__(self, parent=None, title=""):
@@ -62,6 +62,7 @@ class CommandExecutor(QWidget):
     progress_signal = pyqtSignal(int)
     command_finished_signal = pyqtSignal(str)
     finished_with_delete_signal = pyqtSignal(bool)  # Sinal para quando terminar
+    
     def __init__(self):
         super().__init__()
         self.initUI()

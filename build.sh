@@ -30,6 +30,6 @@ fi
 dpkg-deb --build --root-owner-group $PACKAGE_NAME
 
 # Renomeia o pacote para incluir a versão
-mv ${PACKAGE_NAME}.deb ${PACKAGE_NAME}_${VERSION}.deb
+mv ${PACKAGE_NAME}.deb ${PACKAGE_NAME}_${VERSION}_amd64.deb
 
-echo "Pacote ${PACKAGE_NAME}_${VERSION}.deb criado com sucesso!"
+echo "Pacote ${PACKAGE_NAME}_${VERSION}_amd64.deb criado com sucesso!"
