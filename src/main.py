@@ -596,7 +596,7 @@ class CommandExecutor(QWidget):
         timestamp_hour = datetime.now().strftime("%H:%M:%S")
         
         # Diretório .magic no home do usuário
-        magic_dir = os.path.expanduser("~/.magic")
+        magic_dir = os.path.expanduser("~/magic")
         os.makedirs(magic_dir, exist_ok=True)  # Cria o diretório se não existir
         
         # Caminho completo para o arquivo de saída
@@ -623,14 +623,14 @@ class CommandExecutor(QWidget):
             with open(output_file, "a") as f:
                 if command_text:
                     f.write(f"#{command_count}:\n")
-                    f.write(f"Date: {timestamp_date}\nTime: {timestamp_hour}\nCommand: {command_text}\n\n")
+                    f.write(f"Date: {timestamp_date}\nTime: {timestamp_hour}\nCommand: {command_text}\n")
                 if file_path:
                     f.write(f"#{command_count}:\n")
-                    f.write(f"Date: {timestamp_date}\nTime: {timestamp_hour}\nPackage: {file_path}\n\n")
+                    f.write(f"Date: {timestamp_date}\nTime: {timestamp_hour}\nPackage: {file_path}\n")
                 f.write("=" * 30 + "\n")  # Separador para facilitar leitura
 
             # Mensagem de confirmação
-            self.result_area.append(f"#{command_count} saved successfully.")
+            self.result_area.append(f"#{command_count} saved in {magic_dir} successfully.")
 
         except Exception as e:
             self.result_area.append(f"Error saving entries: '{str(e)}'\n")
