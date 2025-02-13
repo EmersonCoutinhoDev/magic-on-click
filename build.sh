@@ -12,13 +12,13 @@ fi
 echo "Atualizando versão para $VERSION..."
 
 # Atualiza a versão no arquivo control
-sed -i "s/^Version:.*/Version: $VERSION/" $PACKAGE_NAME/DEBIAN/control
+# sed -i "s/^Version:.*/Version: $VERSION/" $PACKAGE_NAME/DEBIAN/control
 
 # Atualiza a versão no arquivo .desktop (caso tenha essa linha)
 sed -i "s/^Version=.*/Version=$VERSION/" $PACKAGE_NAME/usr/share/applications/magic.desktop
 
 # Atualiza a versão no arquivo version
-sed -i "s/^v.*/v$VERSION/" $PACKAGE_NAME/usr/lib/magic/version
+# sed -i "s/^v.*/v$VERSION/" $PACKAGE_NAME/usr/lib/magic/version
 
 # Garante que o arquivo .desktop está acessível
 if [ ! -f $PACKAGE_NAME/usr/share/applications/magic.desktop ]; then

@@ -246,7 +246,7 @@ class CommandExecutor(QWidget):
         horizontal_layout.addWidget(self.sub_title_version)
         
         # Link para o site
-        self.website_link = QLabel('<a style=text-decoration:none; href="https://www.magiconclick.com/programs">https://www.magiconclick.com</a>')
+        self.website_link = QLabel('<a style=text-decoration:none cursor:pointer; href="https://www.magiconclick.com/programs">https://www.magiconclick.com</a>')
         self.website_link.setStyleSheet("margin-right: 5px; margin-top: 15px; margin-bottom: 15px;")
         self.website_link.setOpenExternalLinks(True)  # Habilita abertura automática no navegador
         horizontal_layout.addWidget(self.website_link)
@@ -591,30 +591,47 @@ class CommandExecutor(QWidget):
             return False
 
     def save_commands_to_file(self):
-         # Pega a data e hora atual no formato desejado
+        # Pega a data e hora atual no formato desejado
         timestamp_date = datetime.now().strftime("%Y-%m-%d")
         timestamp_hour = datetime.now().strftime("%H:%M:%S")
+        
         # Diretório .magic no home do usuário
         magic_dir = os.path.expanduser("~/.magic")
         os.makedirs(magic_dir, exist_ok=True)  # Cria o diretório se não existir
+        
         # Caminho completo para o arquivo de saída
         output_file = os.path.join(magic_dir, "commands_history.txt")
+
         # Coleta as entradas
         try:
             file_path = self.file_path_display.text().strip()
             command_text = self.command_input.text().strip()
+
             # Verifica se há algo para salvar
             if not command_text and not file_path:
                 self.result_area.append("No commands or files selected.")
                 return
-            # Escreve as entradas no arquivo
+
+            # Contar quantos comandos já existem no arquivo
+            command_count = 1  # Começa do 1 se o arquivo não existir
+            if os.path.exists(output_file):
+                with open(output_file, "r") as f:
+                    lines = f.readlines()
+                    command_count = sum(1 for line in lines if line.startswith("#")) + 1
+
+            # Escreve as entradas no arquivo com numeração
             with open(output_file, "a") as f:
                 if command_text:
-                    f.write(f"Data: {timestamp_date}\nHora: {timestamp_hour}\nCommand: {command_text}\n")
+                    f.write(f"#{command_count}:\n")
+                    f.write(f"Date: {timestamp_date}\nTime: {timestamp_hour}\nCommand: {command_text}\n\n")
                 if file_path:
-                    f.write(f"Data: {timestamp_date}\nHora: {timestamp_hour}\nPackage: {file_path}\n")
-                f.write("=" * 17 + "\n")  # Separador para facilitar leitura
-            # self.result_area.append(f"Logs salvos em {[ output_file ]}\n")
+                    f.write(f"#{command_count}:\n")
+                    f.write(f"Date: {timestamp_date}\nTime: {timestamp_hour}\nPackage: {file_path}\n\n")
+                f.write("=" * 30 + "\n")  # Separador para facilitar leitura
+
+            # Mensagem de confirmação
+            self.result_area.append(f"#{command_count} saved successfully.")
+
         except Exception as e:
             self.result_area.append(f"Error saving entries: '{str(e)}'\n")
 
