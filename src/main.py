@@ -3,7 +3,7 @@ import sys
 import subprocess
 import os
 import re
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog)
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog, QScrollArea)
 from PyQt5.QtCore import (QThread, pyqtSignal, Qt, QSize)
 from PyQt5.QtGui import (QIcon, QPixmap)
 from datetime import datetime
@@ -203,27 +203,66 @@ class CommandExecutor(QWidget):
             deb_files = [f for f in os.listdir(downloads_path) if f.endswith(".deb")]
 
             if deb_files:
+                # Conta o total de arquivos .deb
+                total_files = len(deb_files)
+                
                 # Numera os arquivos
                 numbered_files = [f"{i + 1} - {file}" for i, file in enumerate(deb_files)]
-                return "\n".join(numbered_files)  # Retorna os arquivos com numeração
+                return total_files, "\n".join(numbered_files)  # Retorna os arquivos com numeração
             else:
                 return "No '.deb' files found in ~/Downloads."
 
-        # Exibir lista de arquivos .deb
-        deb_list = list_deb_files()
-        
-        self.label_list = QLabel(f"Files available at ~/Downloads:")
-        self.label_list.setStyleSheet("color: gray; margin-top: 15px; margin-bottom: 0px; margin-left: 100px;")
+        # Obter total de arquivos e lista formatada
+        total_deb_files, deb_list = list_deb_files()
+
+        # Exibir a contagem total
+        self.label_list = QLabel(f"Files available at ~/Downloads: {total_deb_files}")
+        self.label_list.setStyleSheet("color: gray; margin-top: 5px; margin-bottom: 0px; margin-left: 100px;")
         layout.addWidget(self.label_list)
         
+        # Criar um widget para a lista de arquivos
+        file_list_widget = QWidget()
+        file_list_layout = QVBoxLayout(file_list_widget)
+        
         # Exibir lista de arquivos .deb
-        label_deb_list = deb_list
-        self.label_deb_list = QLabel(f"{label_deb_list}")
-        self.label_deb_list.setStyleSheet("color: gray; margin-left: 0px; margin-bottom: 0px; margin-right: 5px; margin-top: 0px; padding-left: 5px; padding: 5px;")
-        
-        layout.addWidget(self.label_deb_list)
-        
-        horizontal_layout = QHBoxLayout()
+        self.label_deb_list = QLabel(deb_list)
+        self.label_deb_list.setStyleSheet("color: gray; margin-left: 0px; margin-bottom: 0px; margin-right: 5px; margin-top: 0px; padding-left: 5px;")
+        self.label_deb_list.setWordWrap(True)  # Quebra de linha automática
+        file_list_layout.addWidget(self.label_deb_list)
+
+        # Criar um QScrollArea para permitir scroll quando houver muitos arquivos
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(file_list_widget)
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none; /* Remove borda padrão */
+            }
+            QScrollBar:vertical {
+                background: #2E3440; /* Fundo do scrollbar */
+                width: 8px; /* Largura da barra */
+                margin: 2px;
+            }
+            QScrollBar::handle:vertical {
+                background: #5C6370; /* Cor cinza da barra */
+                border-radius: 4px;
+                min-height: 20px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #7B8898; /* Cinza mais claro ao passar o mouse */
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                background: none; /* Remove setas de rolagem */
+            }
+        """)
+
+        # Adicionar ao layout principal: usar scroll apenas se houver mais de 5 arquivos
+        if total_deb_files > 5:
+            layout.addWidget(scroll_area, stretch=1)  # Adiciona com um peso para não expandir muito
+        else:
+            layout.addWidget(self.label_deb_list)
+
+        horizontal_layout = QHBoxLayout()  # Mantém o layout horizontal
                 
         # Função para exibir a versão na janela
         def get_installed_version():
