@@ -102,16 +102,16 @@ class CommandExecutor(QWidget):
         # Campo de texto para o comando
         self.command_input = QLineEdit(self)
         self.command_input.hide()
-        self.command_input.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; border: none; font-size: 20px;")
-        self.command_input.setAlignment(Qt.AlignCenter)
+        self.command_input.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; font-size: 20px; padding-left: 5px; border: none;")
+        # self.command_input.setAlignment(Qt.AlignCenter)
         self.command_input.setReadOnly(False)
         layout.addWidget(self.command_input)
 
         # Campo para exibir o caminho do arquivo selecionado
         self.file_path_display = QLineEdit(self)
         self.file_path_display.hide()
-        self.file_path_display.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; border: none; font-size: 20px;")
-        self.file_path_display.setAlignment(Qt.AlignCenter)
+        self.file_path_display.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; font-size: 20px; padding-left: 5px; border: none;")
+        # self.file_path_display.setAlignment(Qt.AlignCenter)
         self.file_path_display.setReadOnly(True)
         layout.addWidget(self.file_path_display)
         
@@ -153,23 +153,72 @@ class CommandExecutor(QWidget):
         self.paste_button = QPushButton("Commands", self)
         self.paste_button.setIcon(QIcon("/usr/share/magic/assets/paste_icon.png"))
         self.paste_button.clicked.connect(self.paste_from_clipboard)
-        self.paste_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 50px; margin-left: 50px; margin-right: 0px;")
+        self.paste_button.setStyleSheet("background-color: #172554; color: white; height: 35px; width: 10px; margin-top: 50px; margin-right: 0px;")
         vertical_button_layout.addWidget(self.paste_button)
 
         # Botão para abrir o diálogo de seleção de arquivo
         self.select_file_button = QPushButton("Packages", self)
         self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/search_icon.png"))
         self.select_file_button.clicked.connect(self.open_file_dialog)
-        self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 50px; width: 30px; margin-top: 50px; margin-left: 0px; margin-right: 50px;")
+        self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 35px; width: 100px; margin-top: 50px; margin-left: 0px;")
         vertical_button_layout.addWidget(self.select_file_button)
  
         layout.addLayout(vertical_button_layout)
         
         # Área de texto para exibir o resultado do comando
+        # self.result_area = QTextEdit(self)
+        # self.result_area.setReadOnly(True)
+        # self.result_area.setStyleSheet("background-color: #2E3440; border: 0px; color: gray; margin-top: 5px;")
+        # layout.addWidget(self.result_area)
+        
+        # Criar um widget para envolver o QTextEdit
+        result_widget = QWidget()
+        result_layout = QVBoxLayout(result_widget)
+
+        # Área de texto para exibir o resultado do comando
         self.result_area = QTextEdit(self)
         self.result_area.setReadOnly(True)
-        self.result_area.setStyleSheet("background-color: #2E3440; border: 0px; color: gray; margin-top: 5px")
-        layout.addWidget(self.result_area)
+        # self.result_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # Desativa o scroll interno
+        self.result_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # Desativa o scroll horizontal
+        self.result_area.setStyleSheet("""
+            QTextEdit {
+                background-color: #2E3440; /* Fundo igual ao scroll_area */
+                border: none;
+                color: gray;
+                padding: 0px;
+            }
+        """)
+        result_layout.addWidget(self.result_area)
+
+        # Criar um QScrollArea para envolver o QTextEdit
+        self.result_scroll_area = QScrollArea()
+        self.result_scroll_area.setWidgetResizable(True)
+        self.result_scroll_area.hide()
+        self.result_scroll_area.setWidget(result_widget)
+        self.result_scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none; /* Remove borda padrão */
+            }
+            QScrollBar:vertical {
+                background: #2E3440; /* Fundo do scrollbar */
+                width: 8px; /* Largura da barra */
+                margin: 2px;
+            }
+            QScrollBar::handle:vertical {
+                background: #5C6370; /* Cor cinza da barra */
+                border-radius: 4px;
+                min-height: 20px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #7B8898; /* Cinza mais claro ao passar o mouse */
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                background: none; /* Remove setas de rolagem */
+            }
+        """)
+
+        # Adicionar o QScrollArea ao layout principal
+        layout.addWidget(self.result_scroll_area)
         
         # Variável para armazenar o caminho do arquivo
         self.file_path = None
@@ -185,7 +234,7 @@ class CommandExecutor(QWidget):
         }
         QProgressBar::chunk {
             background-color: #059669;
-            width: 50px;
+            width: 100px;
         }
         """)
         layout.addWidget(self.progress_bar)
@@ -257,7 +306,7 @@ class CommandExecutor(QWidget):
         """)
 
         # Adicionar ao layout principal: usar scroll apenas se houver mais de 5 arquivos
-        if total_deb_files > 5:
+        if total_deb_files > 8:
             layout.addWidget(scroll_area, stretch=1)  # Adiciona com um peso para não expandir muito
         else:
             layout.addWidget(self.label_deb_list)
@@ -281,12 +330,12 @@ class CommandExecutor(QWidget):
         # Versão instalada
         sub_title_version = installed_version
         self.sub_title_version = QLabel(f"Version: {sub_title_version}")
-        self.sub_title_version.setStyleSheet("color: gray; margin-left: 5px; margin-top: 15px; margin-bottom: 15px;")
+        self.sub_title_version.setStyleSheet("color: gray; margin-left: 5px; margin-top: 5px; margin-bottom: 15px;")
         horizontal_layout.addWidget(self.sub_title_version)
         
         # Link para o site
         self.website_link = QLabel('<a style=text-decoration:none cursor:pointer; href="https://www.magiconclick.com/programs">https://www.magiconclick.com</a>')
-        self.website_link.setStyleSheet("margin-right: 5px; margin-top: 15px; margin-bottom: 15px;")
+        self.website_link.setStyleSheet("margin-right: 5px; margin-top: 5px; margin-bottom: 15px;")
         self.website_link.setOpenExternalLinks(True)  # Habilita abertura automática no navegador
         horizontal_layout.addWidget(self.website_link)
         
@@ -322,6 +371,7 @@ class CommandExecutor(QWidget):
             self.label_deb_list.hide()
             self.label_list.hide()
             self.result_area.show()
+            self.result_scroll_area.show()
 
     def install_package(self):
         if not self.file_path:
@@ -385,24 +435,6 @@ class CommandExecutor(QWidget):
             self.thread.start()
         else:
             self.result_area.setText("Incorrect password. Please try again.")
-
-    # def finished_with_delete(self):
-    #     self.progress_bar.hide()
-    #     self.result_area.append("\nInstallation complete.\n")
-
-    #     # Extrai apenas o nome do arquivo
-    #     file_name = os.path.basename(self.file_path)
-
-    #     # Exibe o diálogo para confirmar a exclusão do arquivo
-    #     confirm_dialog = ConfirmDeleteDialog(file_name, self)
-    #     if confirm_dialog.exec() == QDialog.Accepted:
-    #         try:
-    #             os.remove(self.file_path)
-    #             self.result_area.setText(f"File '{file_name}' was excluded from '{self.file_path.split(file_name)}' successfully.")
-    #         except Exception as e:
-    #             self.result_area.setText(f"Error deleting file: {e}")
-    #     else:
-    #         self.result_area.setText(f"File '{file_name}' will be kept in '{self.file_path.split(file_name)}'.")
     
     def finished_with_delete(self):
         self.progress_bar.hide()
@@ -520,6 +552,7 @@ class CommandExecutor(QWidget):
             self.result_area.show()
             self.label_deb_list.hide()
             self.label_list.hide()
+            self.result_scroll_area.show()
             
     def clear_input(self):
         self.result_area.clear()
@@ -535,12 +568,13 @@ class CommandExecutor(QWidget):
         self.label_deb_list.show()
         self.label_list.show()        
         self.result_area.hide()
+        self.result_scroll_area.hide()
 
     def execute_command(self):
         self.result_area.clear()
         self.progress_bar.setValue(0)
         self.progress_bar.show()
-
+        
         command = self.command_input.text().strip()
     
         if not command:
@@ -666,7 +700,7 @@ class CommandExecutor(QWidget):
                 if file_path:
                     f.write(f"#{command_count}:\n")
                     f.write(f"Date: {timestamp_date}\nTime: {timestamp_hour}\nPackage: {file_path}\n")
-                f.write("=" * 30 + "\n")  # Separador para facilitar leitura
+                f.write("-" * 30 + "\n")  # Separador para facilitar leitura
 
             # Mensagem de confirmação
             self.result_area.append(f"#{command_count} saved in {magic_dir} successfully.")
