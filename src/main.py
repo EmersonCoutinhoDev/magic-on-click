@@ -71,7 +71,6 @@ class CommandExecutor(QWidget):
         # Conecte os sinais aos slots
         self.output_signal.connect(self.update_result_area)
         self.progress_signal.connect(self.update_progress_bar)
-        self.result_area.hide()
         
     def run_commands(self):
         if not self.thread:
@@ -103,7 +102,6 @@ class CommandExecutor(QWidget):
         self.command_input = QLineEdit(self)
         self.command_input.hide()
         self.command_input.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; font-size: 20px; padding-left: 5px; border: none;")
-        # self.command_input.setAlignment(Qt.AlignCenter)
         self.command_input.setReadOnly(False)
         layout.addWidget(self.command_input)
 
@@ -111,7 +109,6 @@ class CommandExecutor(QWidget):
         self.file_path_display = QLineEdit(self)
         self.file_path_display.hide()
         self.file_path_display.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; font-size: 20px; padding-left: 5px; border: none;")
-        # self.file_path_display.setAlignment(Qt.AlignCenter)
         self.file_path_display.setReadOnly(True)
         layout.addWidget(self.file_path_display)
         
@@ -165,12 +162,28 @@ class CommandExecutor(QWidget):
  
         layout.addLayout(vertical_button_layout)
         
-        # Área de texto para exibir o resultado do comando
-        # self.result_area = QTextEdit(self)
-        # self.result_area.setReadOnly(True)
-        # self.result_area.setStyleSheet("background-color: #2E3440; border: 0px; color: gray; margin-top: 5px;")
-        # layout.addWidget(self.result_area)
-        
+        self.progress_bar = QProgressBar(self)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setAlignment(Qt.AlignCenter)
+        self.progress_bar.hide()
+        self.progress_bar.setFixedHeight(30)  # Define altura fixa para manter o padrão visual
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                border: none;  /* Remove qualquer borda */
+                background-color: #2E3440;  /* Mesmo fundo do result_scroll_area */
+                color: white; /* Cor do texto (se necessário) */
+                padding: 2px;
+                font-size: 15px;
+            }
+            QProgressBar::chunk {
+                background-color: #059669; /* Cor do progresso */
+                border-radius: 2px; /* Deixa a barra com cantos arredondados */
+            }
+        """)
+
+        layout.addWidget(self.progress_bar)
+        self.setLayout(layout)
+                
         # Criar um widget para envolver o QTextEdit
         result_widget = QWidget()
         result_layout = QVBoxLayout(result_widget)
@@ -178,26 +191,30 @@ class CommandExecutor(QWidget):
         # Área de texto para exibir o resultado do comando
         self.result_area = QTextEdit(self)
         self.result_area.setReadOnly(True)
-        # self.result_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # Desativa o scroll interno
+        self.result_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # Desativa o scroll interno
         self.result_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # Desativa o scroll horizontal
         self.result_area.setStyleSheet("""
             QTextEdit {
-                background-color: #2E3440; /* Fundo igual ao scroll_area */
+                background-color: #2E3440; /* Define o fundo para o mesmo tom do scroll_area */
                 border: none;
                 color: gray;
-                padding: 0px;
+                padding: 5px; /* Adiciona um pequeno espaço para evitar sobreposição */
             }
         """)
         result_layout.addWidget(self.result_area)
 
         # Criar um QScrollArea para envolver o QTextEdit
         self.result_scroll_area = QScrollArea()
+        self.result_scroll_area.setWidget(result_widget)
         self.result_scroll_area.setWidgetResizable(True)
         self.result_scroll_area.hide()
-        self.result_scroll_area.setWidget(result_widget)
         self.result_scroll_area.setStyleSheet("""
             QScrollArea {
                 border: none; /* Remove borda padrão */
+                background: transparent; /* Deixa o fundo transparente */
+            }
+            QWidget {
+                background: transparent; /* Garante que o widget interno também seja transparente */
             }
             QScrollBar:vertical {
                 background: #2E3440; /* Fundo do scrollbar */
@@ -222,23 +239,6 @@ class CommandExecutor(QWidget):
         
         # Variável para armazenar o caminho do arquivo
         self.file_path = None
-        
-        self.progress_bar = QProgressBar(self)
-        self.progress_bar.setValue(0)
-        self.progress_bar.setAlignment(Qt.AlignCenter)
-        self.progress_bar.hide()
-        self.progress_bar.setStyleSheet("""
-        QProgressBar {
-            border: 0px solid #3B4252;
-            background-color: #2E3440;
-        }
-        QProgressBar::chunk {
-            background-color: #059669;
-            width: 100px;
-        }
-        """)
-        layout.addWidget(self.progress_bar)
-        self.setLayout(layout)
 
         self.select_file_button.setIconSize(QSize(24, 24))
         self.install_button.setIconSize(QSize(24, 24))
