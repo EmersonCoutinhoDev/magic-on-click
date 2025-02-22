@@ -2,8 +2,14 @@ import shutil
 import sys
 import subprocess
 import os
+import requests
 import re
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog, QScrollArea)
+import time
+import threading
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+from plyer import notification
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QDialog, QHBoxLayout, QProgressBar, QLabel, QFileDialog, QScrollArea, QMessageBox)
 from PyQt5.QtCore import (QThread, pyqtSignal, Qt, QSize)
 from PyQt5.QtGui import (QIcon, QPixmap)
 from datetime import datetime
@@ -56,6 +62,42 @@ class CustomTitleBar(QWidget):
     def close_window(self):
         self.parentWidget().close()
 
+
+# Caminho da pasta Downloads
+DOWNLOADS_FOLDER = os.path.expanduser("~/Downloads")
+
+class DebFileHandler(FileSystemEventHandler):
+    """Lida com novos arquivos .deb detectados."""
+    def __init__(self, callback):
+        super().__init__()
+        self.callback = callback
+
+    def on_created(self, event):
+        """Quando um novo arquivo é criado, verifica se é um .deb e abre automaticamente."""
+        if not event.is_directory and event.src_path.endswith(".deb"):
+            # print(f"📥 Novo arquivo detectado: {event.src_path}")
+            self.callback(event.src_path)  # Chama o open_file_dialog com o arquivo detectado
+
+def start_monitoring(callback):
+    """Inicia o monitoramento de arquivos na pasta Downloads."""
+    def run():
+        event_handler = DebFileHandler(callback)
+        observer = Observer()
+        observer.schedule(event_handler, DOWNLOADS_FOLDER, recursive=False)
+        observer.start()
+
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            observer.stop()
+
+        observer.join()
+
+    # Inicia o monitoramento em segundo plano
+    thread = threading.Thread(target=run, daemon=True)
+    thread.start()
+        
 class CommandExecutor(QWidget):
     # Definir sinais que serão usados para comunicação
     output_signal = pyqtSignal(str)
@@ -71,6 +113,8 @@ class CommandExecutor(QWidget):
         # Conecte os sinais aos slots
         self.output_signal.connect(self.update_result_area)
         self.progress_signal.connect(self.update_progress_bar)
+        # Iniciar o monitoramento para abrir automaticamente ao detectar novos .deb
+        start_monitoring(self.open_file_dialog)
         
     def run_commands(self):
         if not self.thread:
@@ -104,6 +148,13 @@ class CommandExecutor(QWidget):
         self.command_input.setStyleSheet("background-color: #2E3440; color: white; margin-top: 15px; height: 30px; font-size: 20px; padding-left: 5px; border: none;")
         self.command_input.setReadOnly(False)
         layout.addWidget(self.command_input)
+
+        # Label para exibir a detecção automática        
+        self.detection_label = QLabel(self)
+        self.detection_label.setAlignment(Qt.AlignCenter)
+        self.detection_label.hide()
+        self.detection_label.setStyleSheet("font-size: 14px; color: gray;")  # Ajuste o estilo conforme necessário
+        layout.addWidget(self.detection_label)  # Adicione ao layout da interface
 
         # Campo para exibir o caminho do arquivo selecionado
         self.file_path_display = QLineEdit(self)
@@ -143,47 +194,7 @@ class CommandExecutor(QWidget):
 
         # Adiciona o layout horizontal ao layout principal
         layout.addLayout(horizontal_button_layout)
-
-        # Botões e layout
-        vertical_button_layout = QHBoxLayout()
         
-        self.paste_button = QPushButton("Commands", self)
-        self.paste_button.setIcon(QIcon("/usr/share/magic/assets/paste_icon.png"))
-        self.paste_button.clicked.connect(self.paste_from_clipboard)
-        self.paste_button.setStyleSheet("background-color: #172554; color: white; height: 35px; width: 10px; margin-top: 50px; margin-right: 0px;")
-        vertical_button_layout.addWidget(self.paste_button)
-
-        # Botão para abrir o diálogo de seleção de arquivo
-        self.select_file_button = QPushButton("Packages", self)
-        self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/search_icon.png"))
-        self.select_file_button.clicked.connect(self.open_file_dialog)
-        self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 35px; width: 100px; margin-top: 50px; margin-left: 0px;")
-        vertical_button_layout.addWidget(self.select_file_button)
- 
-        layout.addLayout(vertical_button_layout)
-        
-        self.progress_bar = QProgressBar(self)
-        self.progress_bar.setValue(0)
-        self.progress_bar.setAlignment(Qt.AlignCenter)
-        self.progress_bar.hide()
-        self.progress_bar.setFixedHeight(30)  # Define altura fixa para manter o padrão visual
-        self.progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: none;  /* Remove qualquer borda */
-                background-color: #2E3440;  /* Mesmo fundo do result_scroll_area */
-                color: white; /* Cor do texto (se necessário) */
-                padding: 2px;
-                font-size: 15px;
-            }
-            QProgressBar::chunk {
-                background-color: #059669; /* Cor do progresso */
-                border-radius: 2px; /* Deixa a barra com cantos arredondados */
-            }
-        """)
-
-        layout.addWidget(self.progress_bar)
-        self.setLayout(layout)
-                
         # Criar um widget para envolver o QTextEdit
         result_widget = QWidget()
         result_layout = QVBoxLayout(result_widget)
@@ -210,11 +221,8 @@ class CommandExecutor(QWidget):
         self.result_scroll_area.hide()
         self.result_scroll_area.setStyleSheet("""
             QScrollArea {
-                border: none; /* Remove borda padrão */
                 background: transparent; /* Deixa o fundo transparente */
-            }
-            QWidget {
-                background: transparent; /* Garante que o widget interno também seja transparente */
+                border: none; /* Remove borda padrão */
             }
             QScrollBar:vertical {
                 background: #2E3440; /* Fundo do scrollbar */
@@ -236,9 +244,28 @@ class CommandExecutor(QWidget):
 
         # Adicionar o QScrollArea ao layout principal
         layout.addWidget(self.result_scroll_area)
+        self.setLayout(layout)          
+
+        # Botões e layout
+        vertical_button_layout = QHBoxLayout()
         
+        self.paste_button = QPushButton("Commands", self)
+        self.paste_button.setIcon(QIcon("/usr/share/magic/assets/paste_icon.png"))
+        self.paste_button.clicked.connect(self.paste_from_clipboard)
+        self.paste_button.setStyleSheet("background-color: #172554; color: white; height: 35px; width: 10px; margin-top: 50px; margin-right: 0px;")
+        vertical_button_layout.addWidget(self.paste_button)
+
+        # Botão para abrir o diálogo de seleção de arquivo
+        self.select_file_button = QPushButton("Packages", self)
+        self.select_file_button.setIcon(QIcon("/usr/share/magic/assets/search_icon.png"))
+        self.select_file_button.clicked.connect(self.open_file_dialog)
+        self.select_file_button.setStyleSheet("background-color: #172554; color: white; height: 35px; width: 100px; margin-top: 50px; margin-left: 0px;")
+        vertical_button_layout.addWidget(self.select_file_button)
+ 
+        layout.addLayout(vertical_button_layout)
+                
         # Variável para armazenar o caminho do arquivo
-        self.file_path = None
+        # self.file_path = None
 
         self.select_file_button.setIconSize(QSize(24, 24))
         self.install_button.setIconSize(QSize(24, 24))
@@ -285,6 +312,7 @@ class CommandExecutor(QWidget):
         scroll_area.setWidget(file_list_widget)
         scroll_area.setStyleSheet("""
             QScrollArea {
+                background: transparent; /* Deixa o fundo transparente */
                 border: none; /* Remove borda padrão */
             }
             QScrollBar:vertical {
@@ -311,8 +339,30 @@ class CommandExecutor(QWidget):
         else:
             layout.addWidget(self.label_deb_list)
 
-        horizontal_layout = QHBoxLayout()  # Mantém o layout horizontal
+        self.progress_bar = QProgressBar(self)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setAlignment(Qt.AlignCenter)
+        self.progress_bar.hide()
+        self.progress_bar.setFixedHeight(30)  # Define altura fixa para manter o padrão visual
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                border: none;  /* Remove qualquer borda */
+                background-color: #2E3440;  /* Mesmo fundo do result_scroll_area */
+                color: white; /* Cor do texto (se necessário) */
+                padding: 2px;
+            }
+            QProgressBar::chunk {
+                background-color: #059669; /* Cor do progresso */
+                border-radius: 2px; /* Deixa a barra com cantos arredondados */
+            }
+        """)
+
+        layout.addWidget(self.progress_bar)
+        self.setLayout(layout)
                 
+        # Mantém o layout horizontal
+        horizontal_layout = QHBoxLayout()
+        
         # Função para exibir a versão na janela
         def get_installed_version():
             try:
@@ -334,34 +384,19 @@ class CommandExecutor(QWidget):
         horizontal_layout.addWidget(self.sub_title_version)
         
         # Link para o site
-        self.website_link = QLabel('<a style=text-decoration:none cursor:pointer; href="https://www.magiconclick.com/programs">https://www.magiconclick.com</a>')
+        self.website_link = QLabel('<a style=text-decoration:none cursor:pointer; href="https://www.magiconclick.com/programs">www.magiconclick.com</a>')
         self.website_link.setStyleSheet("margin-right: 5px; margin-top: 5px; margin-bottom: 15px;")
         self.website_link.setOpenExternalLinks(True)  # Habilita abertura automática no navegador
         horizontal_layout.addWidget(self.website_link)
         
         layout.addLayout(horizontal_layout)
-            
-    def open_file_dialog(self):
-        # Define o caminho inicial para ~/Downloads
-        default_dir = os.path.expanduser("~/Downloads")
-        # Abre o diálogo para selecionar o arquivo .deb
-        options = QFileDialog.Options()
-        options |= QFileDialog.ReadOnly
-        
-        # O filtro foi modificado para incluir tanto .deb
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, 
-            "Select a file", 
-            default_dir, 
-            "Package Debian (*.deb);;Package RPM (*.rpm);;Package Tar.gz (*.tar.gz);;", 
-            options=options
-        )
-        
-        if file_path:
-            self.file_path = file_path
-            # Obtém apenas o nome do arquivo
-            file_name = os.path.basename(file_path)
-            # Exibe o nome do arquivo no campo de texto
+                
+    def open_file_dialog(self, detected_file_path=None):
+        # """Abre o diálogo e seleciona automaticamente o arquivo detectado."""
+        if detected_file_path:
+            # Caso seja detectado automaticamente
+            self.file_path = detected_file_path
+            file_name = os.path.basename(detected_file_path)
             self.file_path_display.setText(file_name)
             self.file_path_display.show()
             self.install_button.show()
@@ -372,6 +407,26 @@ class CommandExecutor(QWidget):
             self.label_list.hide()
             self.result_area.show()
             self.result_scroll_area.show()
+            
+            # Exibir a mensagem de detecção na interface ao invés de imprimir no terminal
+            self.detection_label.setText(f"Package (.deb) automatically detected")
+            self.detection_label.show()  # Torna a label visível
+        else:
+            # Caso seja aberto manualmente
+            default_dir = os.path.expanduser("~/Downloads")
+            options = QFileDialog.Options()
+            options |= QFileDialog.ReadOnly
+            
+            file_path, _ = QFileDialog.getOpenFileName(
+                self, 
+                "Select a file", 
+                default_dir, 
+                "Package Debian (*.deb);;Package RPM (*.rpm);;Package Tar.gz (*.tar.gz);;", 
+                options=options
+            )
+            
+            if file_path:
+                self.open_file_dialog(file_path)
 
     def install_package(self):
         if not self.file_path:
@@ -413,6 +468,8 @@ class CommandExecutor(QWidget):
             self.result_area.setText("Incorrect password. Please try again.")
 
     def install_deb_package(self):
+        self.detection_label.hide()  # Torna a label visível
+        
         if not self.file_path:
             self.result_area.setText("No '.deb' file selected.")
             return
@@ -548,15 +605,16 @@ class CommandExecutor(QWidget):
             self.execute_button.show()
             self.paste_button.hide()
             self.select_file_button.hide()
-            self.clear_button.show()
             self.result_area.show()
             self.label_deb_list.hide()
             self.label_list.hide()
+            self.clear_button.show()
             self.result_scroll_area.show()
+            self.detection_label.hide()
             
     def clear_input(self):
-        self.result_area.clear()
         self.progress_bar.setValue(0)
+        self.result_area.clear()
         self.progress_bar.hide()
         self.execute_button.hide()
         self.install_button.hide()
@@ -569,14 +627,12 @@ class CommandExecutor(QWidget):
         self.label_list.show()        
         self.result_area.hide()
         self.result_scroll_area.hide()
+        self.detection_label.hide()
 
     def execute_command(self):
         self.result_area.clear()
-        self.progress_bar.setValue(0)
-        self.progress_bar.show()
-        
+                
         command = self.command_input.text().strip()
-    
         if not command:
             self.result_area.setText("Empty command. Copy the command to be executed.")
             return
