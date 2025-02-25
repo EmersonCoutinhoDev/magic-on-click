@@ -62,9 +62,11 @@ class CustomTitleBar(QWidget):
     def close_window(self):
         self.parentWidget().close()
 
-
-# Caminho da pasta Downloads
-DOWNLOADS_FOLDER = os.path.expanduser("~/Downloads")
+# Pastas a serem monitoradas
+MONITOR_FOLDERS = [
+    os.path.expanduser("~/Downloads"),
+    os.path.expanduser("~/Apps")
+]
 
 class DebFileHandler(FileSystemEventHandler):
     """Lida com novos arquivos .deb detectados."""
@@ -76,23 +78,38 @@ class DebFileHandler(FileSystemEventHandler):
         """Quando um novo arquivo é criado, verifica se é um .deb e abre automaticamente."""
         if not event.is_directory and event.src_path.endswith(".deb"):
             # print(f"📥 Novo arquivo detectado: {event.src_path}")
-            self.callback(event.src_path)  # Chama o open_file_dialog com o arquivo detectado
+            self.callback(event.src_path)  # Abre automaticamente no Magic
+
 
 def start_monitoring(callback):
-    """Inicia o monitoramento de arquivos na pasta Downloads."""
+    """Inicia o monitoramento em várias pastas."""    
+    # Diretório .magic no home do usuário
+    apps_dir = os.path.expanduser("~/Apps")
+    os.makedirs(apps_dir, exist_ok=True)  # Cria o diretório se não existir
+    
     def run():
-        event_handler = DebFileHandler(callback)
-        observer = Observer()
-        observer.schedule(event_handler, DOWNLOADS_FOLDER, recursive=False)
-        observer.start()
+        observers = []
+
+        for folder in MONITOR_FOLDERS:
+            if os.path.exists(folder):
+                event_handler = DebFileHandler(callback)
+                observer = Observer()
+                observer.schedule(event_handler, folder, recursive=False)
+                observer.start()
+                observers.append(observer)
+                # print(f"🔍 Monitorando pasta: {folder}")
+            else:
+                print(f"⚠️ Pasta não encontrada: {folder}")
 
         try:
             while True:
                 time.sleep(1)
         except KeyboardInterrupt:
-            observer.stop()
+            for observer in observers:
+                observer.stop()
 
-        observer.join()
+        for observer in observers:
+            observer.join()
 
     # Inicia o monitoramento em segundo plano
     thread = threading.Thread(target=run, daemon=True)
@@ -380,21 +397,21 @@ class CommandExecutor(QWidget):
         # Versão instalada
         sub_title_version = installed_version
         self.sub_title_version = QLabel(f"Version: {sub_title_version}")
-        self.sub_title_version.setStyleSheet("color: gray; margin-left: 5px; margin-top: 5px; margin-bottom: 15px;")
+        self.sub_title_version.setStyleSheet("color: gray; margin-left: 5px; margin-top: 5px; margin-bottom: 15px; margin-right: 200px;")
         horizontal_layout.addWidget(self.sub_title_version)
         
         # Link para o site
-        self.website_link = QLabel('<a style=text-decoration:none cursor:pointer; href="https://www.magiconclick.com/programs">www.magiconclick.com</a>')
-        self.website_link.setStyleSheet("margin-right: 5px; margin-top: 5px; margin-bottom: 15px;")
+        self.website_link = QLabel('<a style=text-decoration:none cursor:pointer; href="https://www.magiconclick.com/programs">Magic on Click</a>')
+        self.website_link.setStyleSheet("margin-right: 5px; margin-top: 5px; margin-bottom: 15px; margin-left: 5px;")
         self.website_link.setOpenExternalLinks(True)  # Habilita abertura automática no navegador
         horizontal_layout.addWidget(self.website_link)
         
         layout.addLayout(horizontal_layout)
-                
+                    
     def open_file_dialog(self, detected_file_path=None):
-        # """Abre o diálogo e seleciona automaticamente o arquivo detectado."""
+        """Abre o diálogo e seleciona automaticamente o arquivo detectado."""
         if detected_file_path:
-            # Caso seja detectado automaticamente
+            # Detectado automaticamente
             self.file_path = detected_file_path
             file_name = os.path.basename(detected_file_path)
             self.file_path_display.setText(file_name)
@@ -407,12 +424,11 @@ class CommandExecutor(QWidget):
             self.label_list.hide()
             self.result_area.show()
             self.result_scroll_area.show()
-            
             # Exibir a mensagem de detecção na interface ao invés de imprimir no terminal
-            self.detection_label.setText(f"Package (.deb) automatically detected")
+            self.detection_label.setText(f"Package (.deb) automatically detected:\n {file_name}")
             self.detection_label.show()  # Torna a label visível
         else:
-            # Caso seja aberto manualmente
+            # Abre o diálogo manualmente
             default_dir = os.path.expanduser("~/Downloads")
             options = QFileDialog.Options()
             options |= QFileDialog.ReadOnly
