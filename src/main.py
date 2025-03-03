@@ -65,7 +65,8 @@ class CustomTitleBar(QWidget):
 # Pastas a serem monitoradas
 MONITOR_FOLDERS = [
     os.path.expanduser("~/Downloads"),
-    os.path.expanduser("~/Apps")
+    # os.path.expanduser("~/Apps")
+    os.path.expanduser("~/Downloads/Install(.deb)")
 ]
 
 class DebFileHandler(FileSystemEventHandler):
@@ -80,11 +81,11 @@ class DebFileHandler(FileSystemEventHandler):
             # print(f"📥 Novo arquivo detectado: {event.src_path}")
             self.callback(event.src_path)  # Abre automaticamente no Magic
 
-
 def start_monitoring(callback):
     """Inicia o monitoramento em várias pastas."""    
     # Diretório .magic no home do usuário
-    apps_dir = os.path.expanduser("~/Apps")
+    # apps_dir = os.path.expanduser("~/Apps")
+    apps_dir = os.path.expanduser("~/Downloads/Install(.deb)")
     os.makedirs(apps_dir, exist_ok=True)  # Cria o diretório se não existir
     
     def run():
@@ -100,7 +101,6 @@ def start_monitoring(callback):
                 # print(f"🔍 Monitorando pasta: {folder}")
             else:
                 print(f"⚠️ Pasta não encontrada: {folder}")
-
         try:
             while True:
                 time.sleep(1)
@@ -443,6 +443,7 @@ class CommandExecutor(QWidget):
             
             if file_path:
                 self.open_file_dialog(file_path)
+                self.detection_label.hide()  # Torna a label invisível
 
     def install_package(self):
         if not self.file_path:
@@ -482,7 +483,7 @@ class CommandExecutor(QWidget):
             self.thread.start()
         else:
             self.result_area.setText("Incorrect password. Please try again.")
-
+            
     def install_deb_package(self):
         self.detection_label.hide()  # Torna a label visível
         
@@ -741,7 +742,7 @@ class CommandExecutor(QWidget):
         timestamp_hour = datetime.now().strftime("%H:%M:%S")
         
         # Diretório .magic no home do usuário
-        magic_dir = os.path.expanduser("~/magic")
+        magic_dir = os.path.expanduser("~/.magic")
         os.makedirs(magic_dir, exist_ok=True)  # Cria o diretório se não existir
         
         # Caminho completo para o arquivo de saída
@@ -792,6 +793,17 @@ class CommandExecutor(QWidget):
         result_command = re.sub(r".*-S\s*", "", commands).strip()
         # Imprime o comando atual finalizado
         self.result_area.append(f"\nCommand: '{result_command}', executed successfully.\n")
+
+    def closeEvent(self, event):
+        install_folder = os.path.expanduser("~/Downloads/Install(.deb)")
+        # Verifica se a pasta existe antes de tentar excluir
+        if os.path.exists(install_folder):
+            try:
+                shutil.rmtree(install_folder)  # Remove a pasta e todo o conteúdo
+                # print(f"Pasta '{install_folder}' excluída ao fechar o Magic.")
+            except Exception as e:
+                print(f"Erro ao excluir '{install_folder}': {e}")
+        event.accept()  # Fecha o aplicativo normalmente
 
 class ConfirmDeleteDialog(QDialog):
     def __init__(self, file_name, parent=None):
