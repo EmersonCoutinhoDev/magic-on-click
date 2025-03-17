@@ -65,8 +65,7 @@ class CustomTitleBar(QWidget):
 # Pastas a serem monitoradas
 MONITOR_FOLDERS = [
     os.path.expanduser("~/Downloads"),
-    # os.path.expanduser("~/Apps")
-    os.path.expanduser("~/Downloads/Install(.deb)")
+    os.path.expanduser("~/Downloads/Install")
 ]
 
 class DebFileHandler(FileSystemEventHandler):
@@ -84,8 +83,7 @@ class DebFileHandler(FileSystemEventHandler):
 def start_monitoring(callback):
     """Inicia o monitoramento em várias pastas."""    
     # Diretório .magic no home do usuário
-    # apps_dir = os.path.expanduser("~/Apps")
-    apps_dir = os.path.expanduser("~/Downloads/Install(.deb)")
+    apps_dir = os.path.expanduser("~/Downloads/Install")
     os.makedirs(apps_dir, exist_ok=True)  # Cria o diretório se não existir
     
     def run():
@@ -98,7 +96,6 @@ def start_monitoring(callback):
                 observer.schedule(event_handler, folder, recursive=False)
                 observer.start()
                 observers.append(observer)
-                # print(f"🔍 Monitorando pasta: {folder}")
             else:
                 print(f"⚠️ Pasta não encontrada: {folder}")
         try:
@@ -227,6 +224,8 @@ class CommandExecutor(QWidget):
                 border: none;
                 color: gray;
                 padding: 5px; /* Adiciona um pequeno espaço para evitar sobreposição */
+                margin-top: 0px;
+                margin-bottom: 0px;
             }
         """)
         result_layout.addWidget(self.result_area)
@@ -661,7 +660,8 @@ class CommandExecutor(QWidget):
         # Palavras-chave a serem verificadas
         keywords = ["remove", "purge", "uninstall", "delete", "upgrade", "install", "autoremove", "autoclean"]
         keyword_update = "update"  # Palavra-chave que exige 'sudo'
-        
+        # keyword_update_variants = ["sudo apt update", "sudo apt-get update"]  # Ambos os comandos suportados
+             
         # Iterar sobre cada comando e verificar se ele contém palavras exatas das keywords
         for cmd in commands:
             # Dividir o comando em palavras individuais
@@ -697,6 +697,10 @@ class CommandExecutor(QWidget):
         if not commands:
             self.result_area.setText("No valid commands provided.")
             return
+        
+        # Se um dos comandos "sudo apt update" ou "sudo apt-get update" for detectado, adiciona "apt list --upgradable"
+        # if any(update_cmd in commands for update_cmd in keyword_update_variants):
+        #     commands.append("apt list --upgradable")        
 
         if "sudo" in command:
             password, ok = CustomInputDialog(self).get_input()
@@ -795,12 +799,12 @@ class CommandExecutor(QWidget):
         self.result_area.append(f"\nCommand: '{result_command}', executed successfully.\n")
 
     def closeEvent(self, event):
-        install_folder = os.path.expanduser("~/Downloads/Install(.deb)")
+        install_folder = os.path.expanduser("~/Downloads/Install")
         # Verifica se a pasta existe antes de tentar excluir
         if os.path.exists(install_folder):
             try:
                 shutil.rmtree(install_folder)  # Remove a pasta e todo o conteúdo
-                # print(f"Pasta '{install_folder}' excluída ao fechar o Magic.")
+                print(f"Pasta '{install_folder}' excluída ao fechar o Magic.")
             except Exception as e:
                 print(f"Erro ao excluir '{install_folder}': {e}")
         event.accept()  # Fecha o aplicativo normalmente
